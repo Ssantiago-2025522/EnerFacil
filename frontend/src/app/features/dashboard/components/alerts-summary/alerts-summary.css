@@ -1,0 +1,15 @@
+:host { display: flex; flex-direction: column; gap: 10px; }
+.alert { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid; border-radius: 14px; }
+.alert__icon { display: grid; flex: none; place-items: center; width: 34px; height: 34px; border-radius: 50%; }
+.alert__text { flex: 1; min-width: 0; }
+.alert__title { margin: 0 0 2px; font-size: 13px; font-weight: 600; }
+.alert__desc { margin: 0; font-size: 12px; color: var(--ef-muted); }
+.alert--warning { background: #fff6dd; border-color: var(--ef-warn-border); }
+.alert--warning .alert__icon { color: var(--ef-warn); background: #fbe6a8; }
+.alert--success { background: var(--ef-success-bg); border-color: #c6e5d3; }
+.alert--success .alert__icon { color: var(--ef-success); background: #d3ecdd; }
+.alert--info { background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.alert--info .alert__icon { color: var(--ef-blue); background: #d6e3f9; }
+.alert--danger { background: var(--ef-danger-bg); border-color: #f4c6c6; }
+.alert--danger .alert__icon { color: var(--ef-danger); background: #f8d2d2; }
+@media (max-width: 640px) { .alert { flex-wrap: wrap; } }

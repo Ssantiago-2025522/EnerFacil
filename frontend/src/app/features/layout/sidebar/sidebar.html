@@ -1,0 +1,67 @@
+<aside class="side">
+  <a class="brand" routerLink="/inicio" aria-label="EnerFacil">
+    <span class="brand__mark"><app-icon name="bolt" [size]="16" /></span>
+    <span class="brand__name">EnerFacil</span>
+  </a>
+
+ 
+<div class="home">
+  <span class="home__icon">
+    <app-icon name="home" [size]="16" />
+  </span>
+
+  @if (viviendaActual(); as vivienda) {
+    <div class="home__text">
+      <strong>{{ vivienda.nombre }}</strong>
+
+      <span>
+        {{ vivienda.region || 'Sin región' }}
+        @if (vivienda.num_habitantes !== null) {
+          · {{ vivienda.num_habitantes }}
+          {{ vivienda.num_habitantes === 1 ? 'persona' : 'personas' }}
+        }
+      </span>
+    </div>
+  } @else {
+    <div class="home__text">
+      <strong>Sin vivienda seleccionada</strong>
+      <span>Selecciona una vivienda</span>
+    </div>
+  }
+
+  <app-icon name="chevron-down" [size]="14" />
+</div>
+
+  <nav class="nav" aria-label="Principal">
+    @for (item of items; track item.label) {
+      @if (item.link; as link) {
+        <a class="nav__item" [routerLink]="link" routerLinkActive="nav__item--active">
+          <app-icon [name]="item.icon" [size]="16" />
+          <span>{{ item.label }}</span>
+          <i class="nav__dot"></i>
+        </a>
+      } @else {
+        <span class="nav__item" aria-disabled="true" title="Próximamente">
+          <app-icon [name]="item.icon" [size]="16" />
+          <span>{{ item.label }}</span>
+        </span>
+      }
+    }
+  </nav>
+
+  <div class="side__bottom">
+    <div class="help">
+      <app-icon name="message" [size]="16" />
+      <p class="help__title">Ahorrar empieza por entender.</p>
+      <span class="help__link">Visita la guía de ayuda <app-icon name="external" [size]="12" /></span>
+    </div>
+
+    <div class="user">
+      <span class="user__avatar">{{ iniciales() }}</span>
+      <div class="user__text"><strong>{{ nombre() }}</strong><span>Mi cuenta</span></div>
+      <button type="button" class="user__logout" (click)="auth.logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
+        <app-icon name="logout" [size]="16" />
+      </button>
+    </div>
+  </div>
+</aside>

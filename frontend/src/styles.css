@@ -1,0 +1,215 @@
+/* ===== EnerFacil · tokens y estilos compartidos ===== */
+:root {
+  --ef-blue: #3b6fc9;
+  --ef-blue-hover: #315dab;
+  --ef-blue-soft: #eaf1fc;
+  --ef-ink: #1c2434;
+  --ef-muted: #6b7686;
+  --ef-border: #e1e6ee;
+  --ef-card: #f7f8fa;
+  --ef-warn-bg: #fef4dc;
+  --ef-yellow: #f2c649;
+  --ef-danger: #c93c3c;
+  --ef-danger-bg: #fdecec;
+  --ef-radius: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ef-ink);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ----- Formulario de autenticación (usado por Login y Register) ----- */
+.auth-card { width: 100%; max-width: 480px; margin-inline: auto; }
+
+.auth-eyebrow {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ef-blue);
+}
+.auth-title {
+  margin: 0 0 14px;
+  font-size: clamp(32px, 2.6vw + 8px, 48px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+.auth-lead { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ef-muted); }
+
+.auth-form { margin-top: 36px; }
+
+.field { margin-bottom: 24px; }
+.field label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+.field input, .field select {
+  width: 100%;
+  height: 58px;
+  padding: 0 18px;
+  font: inherit;
+  font-size: 16px;
+  color: var(--ef-ink);
+  background: #fff;
+  border: 1px solid var(--ef-border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder { color: #9aa3b2; }
+.field input:hover, .field select:hover { border-color: #cdd5e2; }
+.field input:focus, .field select:focus { border-color: var(--ef-blue); box-shadow: 0 0 0 3px rgb(59 111 201 / 0.15); }
+.field input:disabled, .field select:disabled { color: var(--ef-muted); background: var(--ef-card); cursor: not-allowed; }
+.field--invalid input, .field--invalid select { border-color: var(--ef-danger); }
+.field--invalid input:focus, .field--invalid select:focus { box-shadow: 0 0 0 3px rgb(201 60 60 / 0.15); }
+.field__hint { margin: 8px 0 0; font-size: 12px; color: var(--ef-muted); }
+.field__opt { font-weight: 400; color: var(--ef-muted); }
+.field__error { margin: 8px 0 0; font-size: 13px; color: var(--ef-danger); }
+
+.input-wrap { position: relative; }
+.input-wrap input { padding-right: 56px; }
+.input-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--ef-muted);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.input-toggle:hover { color: var(--ef-ink); }
+.input-toggle:focus-visible { outline: 2px solid var(--ef-blue); }
+
+.auth-alert, .alert {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ef-danger);
+  background: var(--ef-danger-bg);
+  border: 1px solid #f4c6c6;
+  border-radius: var(--ef-radius);
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 58px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ef-blue);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover:not(:disabled) { background: var(--ef-blue-hover); }
+.btn-primary:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.auth-switch { margin: 24px 0 0; font-size: 15px; text-align: center; color: var(--ef-muted); }
+.auth-switch a, .link { font-weight: 600; color: var(--ef-blue); text-decoration: none; }
+.auth-switch a:hover, .link:hover { text-decoration: underline; }
+
+/* ===== App autenticada: tokens y tarjetas compartidas ===== */
+:root {
+  --ef-app-bg: #f6f8fb;
+  --ef-success: #2f8f63;
+  --ef-success-bg: #eaf6ef;
+  --ef-warn: #a56a00;
+  --ef-warn-border: #f1deaa;
+  --ef-bar: #7c9fdc;
+  --ef-bar-strong: #2f5fbf;
+  --ef-bar-soft: #b4c9f0;
+}
+
+.card {
+  padding: 22px;
+  background: #fff;
+  border: 1px solid var(--ef-border);
+  border-radius: 16px;
+}
+.card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.card__title { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.card__sub { margin: 4px 0 0; font-size: 12px; color: var(--ef-muted); }
+.card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ef-blue);
+  background: none;
+  border: 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.card__link:disabled { cursor: default; }
+.chip {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+/* Botones de la app autenticada (los .btn-primary de arriba son los grandes de login/registro) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ef-ink);
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid var(--ef-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:hover:not(:disabled) { background: var(--ef-card); border-color: #cdd5e2; }
+.btn:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn--primary { color: #fff; background: var(--ef-blue); border-color: var(--ef-blue); }
+.btn--primary:hover:not(:disabled) { background: var(--ef-blue-hover); border-color: var(--ef-blue-hover); }
+.btn--danger { color: #fff; background: var(--ef-danger); border-color: var(--ef-danger); }
+.btn--danger:hover:not(:disabled) { background: #a93131; border-color: #a93131; }
+.btn--danger-ghost { color: var(--ef-danger); }
+.btn--danger-ghost:hover:not(:disabled) { background: var(--ef-danger-bg); border-color: #f4c6c6; }
+
+.alert--success { color: var(--ef-success); background: var(--ef-success-bg); border-color: #c6e5d3; }
+.alert--info { color: #3b4558; background: var(--ef-blue-soft); border-color: #d6e3f9; }
+
+/* Evita que la página de fondo se desplace mientras hay un <dialog> modal abierto */
+body:has(dialog[open]) { overflow: hidden; }
+
+@media (max-width: 520px) {
+  .field input, .field select, .btn-primary { height: 54px; }
+  .auth-form { margin-top: 28px; }
+}

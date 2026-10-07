@@ -1,0 +1,119 @@
+<section class="dash">
+  <header class="dash__head">
+    <div>
+      <h1 class="dash__title">Tu energía, más clara.</h1>
+      <p class="dash__sub">Así va tu hogar este ciclo. Pequeños cambios, menos gasto.</p>
+    </div>
+    @if (data(); as d) {
+      <div class="dash__period">
+        <div class="dash__date"><app-icon name="calendar" [size]="16" /> {{ periodo() }}</div>
+        <span>Día {{ d.resumen.dias_transcurridos }} de {{ d.resumen.dias_totales }}</span>
+      </div>
+    }
+  </header>
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tu información">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0 || selected() === null) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Aún no hay una vivienda seleccionada</h2>
+          <p class="state__text">Selecciona una vivienda para ver su información.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="dash__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="dash__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="card skel" aria-busy="true" aria-label="Cargando los datos de tu vivienda">
+              <div class="skel__line skel__line--title"></div>
+              <div class="skel__line"></div>
+              <div class="skel__line"></div>
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tu información</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (data(); as d) {
+              <app-alerts-summary [alerts]="estado()" />
+
+              @if (sinConsumo()) {
+                <div class="card dash__empty"><p>No hay datos disponibles.</p><small>Registra horas de uso o lecturas del medidor, o agrega electrodomésticos activos, para ver tu consumo.</small></div>
+              } @else {
+                <div class="dash__stats">
+                  <app-stat-card
+                    label="Consumo acumulado" icon="bolt"
+                    [value]="fmt(d.resumen.kwh_acumulado, 1)" unit="kWh"
+                    [detail]="'Del ' + fmtDia(d.resumen.fecha_inicio, 'short') + ' a hoy'"
+                    [note]="fuenteTexto()" />
+
+                  <app-stat-card
+                    label="Consumo proyectado al cierre" icon="trending-up"
+                    [value]="fmt(d.resumen.kwh_proyectado, 1)" unit="kWh"
+                    [detail]="comparacion()?.texto ?? ''"
+                    [trend]="comparacion()?.trend ?? null"
+                    [tone]="comparacion()?.tone ?? 'default'"
+                    [note]="'Faltan ' + d.resumen.dias_restantes + (d.resumen.dias_restantes === 1 ? ' día' : ' días') + ' del ciclo'" />
+
+                  <app-stat-card
+                    label="Monto estimado al cierre" icon="wallet" [accent]="true"
+                    [value]="montoProyectado() ?? '—'"
+                    [detail]="montoAcumulado() ? 'Acumulado hasta hoy: ' + montoAcumulado() : 'Sin tarifa asignada: no hay monto estimado.'"
+                    tone="accent"
+                    [note]="d.resumen.tarifa ? 'Tarifa: ' + d.resumen.tarifa.nombre : ''" />
+                </div>
+              }
+
+              <div class="dash__row dash__row--energy">
+                <app-budget-summary [presupuesto]="d.presupuesto" [acumulado]="d.resumen.monto_acumulado" [moneda]="moneda()" />
+                <app-energy-breakdown [items]="electrodomesticos()" [subtitle]="origenTexto()" />
+              </div>
+
+              <p class="dash__disclaimer">
+                <app-icon name="info" [size]="14" />
+                No es una medición real ni una factura emitida. Estimaciones basadas en la potencia, los hábitos registrados y tu tarifa.
+              </p>
+            }
+          }
+        }
+      }
+    }
+  }
+</section>

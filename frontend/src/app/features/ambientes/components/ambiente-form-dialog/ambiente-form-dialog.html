@@ -1,0 +1,39 @@
+<dialog #dlg class="dlg" aria-labelledby="af-title" (cancel)="onCancel($event)" (click)="onBackdrop($event)">
+  <form class="dlg__box" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="dlg__head">
+      <div class="dlg__heading">
+        <span class="dlg__icon"><app-icon name="door" [size]="18" /></span>
+        <div>
+          <h2 id="af-title" class="dlg__title">{{ editando() ? 'Editar ambiente' : 'Agregar ambiente' }}</h2>
+          <p class="dlg__sub">{{ editando() ? 'Actualiza el nombre o el tipo de este espacio.' : 'Por ejemplo: sala, cocina, dormitorio o baño.' }}</p>
+        </div>
+      </div>
+      <button type="button" class="dlg__close" (click)="cerrar()" [disabled]="submitting()" aria-label="Cerrar">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    @if (serverError(); as message) { <p class="alert" role="alert">{{ message }}</p> }
+
+    <div class="field field--compact" [class.field--invalid]="errorNombre()">
+      <label for="af-nombre">Nombre</label>
+      <input id="af-nombre" type="text" formControlName="nombre" placeholder="Cocina principal" autocomplete="off" autofocus
+             [attr.maxlength]="limites.nombre + 20" [attr.aria-invalid]="errorNombre() ? true : null" />
+      @if (errorNombre(); as message) { <p class="field__error">{{ message }}</p> }
+    </div>
+
+    <div class="field field--compact">
+      <label for="af-tipo">Tipo</label>
+      <select id="af-tipo" formControlName="tipo">
+        @for (t of tipos; track t.value) { <option [ngValue]="t.value">{{ t.label }}</option> }
+      </select>
+    </div>
+
+    <footer class="dlg__actions">
+      <button type="button" class="btn" (click)="cerrar()" [disabled]="submitting()">Cancelar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+        @if (submitting()) { Guardando… } @else { {{ editando() ? 'Guardar cambios' : 'Agregar ambiente' }} }
+      </button>
+    </footer>
+  </form>
+</dialog>

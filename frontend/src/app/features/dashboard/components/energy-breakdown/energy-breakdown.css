@@ -1,0 +1,12 @@
+:host { display: block; }
+.list { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.row { display: flex; align-items: flex-start; gap: 12px; }
+.row__icon { display: grid; flex: none; place-items: center; width: 32px; height: 32px; color: var(--ef-muted); background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 8px; }
+.row__body { flex: 1; min-width: 0; }
+.row__top { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+.row__top strong { font-weight: 600; }
+.track { height: 3px; margin: 5px 0 4px; overflow: hidden; background: #e8edf5; border-radius: 999px; }
+.track i { display: block; height: 100%; background: var(--ef-bar-strong); border-radius: 999px; }
+small { font-size: 11px; color: var(--ef-muted); }
+.empty { margin: 0; font-size: 13px; color: var(--ef-muted); }
+a.card__link { text-decoration: none; }

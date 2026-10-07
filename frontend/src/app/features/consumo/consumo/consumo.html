@@ -1,0 +1,429 @@
+<section class="co">
+  <header class="co__head">
+    <div>
+      <h1 class="co__title">Consumo / Historial</h1>
+      <p class="co__sub">Tu consumo eléctrico real: lo que va del ciclo, la proyección, el historial por periodo y el detalle por equipo y ambiente.</p>
+    </div>
+    @if (viviendasStatus() === 'ready' && selected() && status() === 'ready' && !sinDatos()) {
+      <div class="co__actions">
+        <button type="button" class="btn" (click)="abrirRegistro('lectura')"><app-icon name="bolt" [size]="15" /> Registrar lectura</button>
+        @if (electros().length > 0) {
+          <button type="button" class="btn btn--primary" (click)="abrirRegistro('uso')"><app-icon name="plus" [size]="15" /> Registrar uso</button>
+        }
+      </div>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert co__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'" role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="co__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso"><app-icon name="close" [size]="14" /></button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tu consumo">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">El consumo se mide por vivienda. Agrega tu hogar y vuelve aquí para ver tu consumo.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="co__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="co__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="co__kpis" aria-busy="true" aria-label="Cargando consumo">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="card skel skel--item"><div class="skel__line skel__line--title"></div><div class="skel__line"></div></div>
+              }
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tu consumo</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (sinDatos()) {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="bolt" [size]="24" /></span>
+                <h2 class="state__title">Aún no hay consumo registrado</h2>
+                <p class="state__text">
+                  Registra la lectura de tu medidor (con dos o más lecturas calculamos tu consumo) o las horas de uso de tus equipos.
+                </p>
+                <div class="state__actions">
+                  <button type="button" class="btn btn--primary" (click)="abrirRegistro('lectura')"><app-icon name="bolt" [size]="15" /> Registrar lectura</button>
+                  @if (electros().length > 0) {
+                    <button type="button" class="btn" (click)="abrirRegistro('uso')"><app-icon name="plug" [size]="15" /> Registrar uso de un equipo</button>
+                  } @else {
+                    <a class="btn" routerLink="/electrodomesticos"><app-icon name="plug" [size]="15" /> Agregar electrodomésticos</a>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="co__tabs" role="group" aria-label="Secciones">
+                <button type="button" class="tab" [class.tab--active]="vista() === 'resumen'" [attr.aria-pressed]="vista() === 'resumen'" (click)="cambiarVista('resumen')">Resumen</button>
+                <button type="button" class="tab" [class.tab--active]="vista() === 'lecturas'" [attr.aria-pressed]="vista() === 'lecturas'" (click)="cambiarVista('lecturas')">
+                  Lecturas del medidor <span class="tab__count">{{ lecturas().length }}</span>
+                </button>
+                <button type="button" class="tab" [class.tab--active]="vista() === 'usos'" [attr.aria-pressed]="vista() === 'usos'" (click)="cambiarVista('usos')">
+                  Uso diario <span class="tab__count">{{ usos().length }}</span>
+                </button>
+              </div>
+
+              @switch (vista()) {
+                @case ('resumen') {
+                  <div class="co__toolbar">
+                    <div class="co__period">
+                      <label for="co-periodo">Periodo</label>
+                      <select id="co-periodo" (change)="onPeriodo($any($event.target).value)">
+                        @for (o of opciones(); track o.value) {
+                          <option [value]="o.value" [selected]="o.value === (periodoSel() === 'actual' ? 'actual' : '' + periodoSel())">{{ o.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    @if (periodoSel() === 'actual') {
+                      <button type="button" class="btn" (click)="recalcular()" [disabled]="recalculando()">
+                        <app-icon name="refresh" [size]="14" /> {{ recalculando() ? 'Actualizando…' : 'Actualizar cálculo' }}
+                      </button>
+                    }
+                  </div>
+                  @if (recalcError(); as message) { <p class="alert" role="alert">{{ message }}</p> }
+
+                  @if (resumen(); as r) {
+                    <section class="card co__summary" aria-label="Resumen del periodo">
+                      <header class="card__head">
+                        <div>
+                          <h2 class="card__title">
+                            {{ r.esActual ? 'Ciclo actual' : r.cerrado ? 'Periodo cerrado' : 'Periodo' }}
+                          </h2>
+                          <p class="card__sub">
+                            {{ fmtDia(r.inicio, 'long') }} – {{ fmtDia(r.fin, 'long') }}
+                            @if (r.diasTranscurridos !== null) { · día {{ r.diasTranscurridos }} de {{ r.diasTotales }} }
+                          </p>
+                        </div>
+                        <div class="co__chips">
+                          @if (r.fuente; as f) { <span class="chip co__chip">{{ fuenteLabel(f) }}</span> }
+                          @if (!r.esActual) { <span class="chip co__chip" [class.co__chip--off]="!r.cerrado">{{ r.cerrado ? 'Cerrado' : 'En curso' }}</span> }
+                        </div>
+                      </header>
+
+                      @if (r.esActual && r.fuente === 'SIN_DATOS') {
+                        <p class="co__hint">
+                          Este ciclo aún no tiene datos. Registra al menos dos lecturas del medidor en fechas distintas o las horas de uso de tus equipos.
+                        </p>
+                      } @else {
+                        <dl class="co__kpis">
+                          <div class="kpi">
+                            <dt>{{ r.esActual ? 'Consumido hasta hoy' : 'Consumo del periodo' }}</dt>
+                            <dd><strong>{{ fmtNum(r.kwh, 1) }}</strong> kWh</dd>
+                          </div>
+                          @if (!r.cerrado) {
+                            <div class="kpi">
+                              <dt>{{ r.fuente === 'ESTIMACION' ? 'Estimación del ciclo' : 'Proyección del ciclo' }}</dt>
+                              <dd><strong>{{ fmtNum(r.kwhProyectado, 1) }}</strong> kWh</dd>
+                            </div>
+                          }
+                          @if (r.promedioDiario !== null) {
+                            <div class="kpi">
+                              <dt>Promedio diario</dt>
+                              <dd><strong>{{ fmtNum(r.promedioDiario, 2) }}</strong> kWh/día</dd>
+                            </div>
+                          }
+                          @if (moneda() !== null) {
+                            <div class="kpi">
+                              <dt>{{ r.cerrado ? 'Monto del periodo' : 'Monto acumulado' }}</dt>
+                              <dd><strong>{{ montoTexto(r.montoAcumulado) }}</strong></dd>
+                            </div>
+                            @if (!r.cerrado) {
+                              <div class="kpi">
+                                <dt>Monto proyectado</dt>
+                                <dd><strong>{{ montoTexto(r.montoProyectado) }}</strong></dd>
+                              </div>
+                            }
+                          }
+                        </dl>
+                        @if (moneda() === null) {
+                          <p class="co__hint">
+                            Tu vivienda no tiene tarifa asignada, por eso no mostramos montos.
+                            <a class="link" routerLink="/vivienda">Elegir tarifa</a>
+                          </p>
+                        } @else {
+                          <p class="co__note">Los montos son una estimación con tu tarifa (incluyen el cargo fijo); no son una factura.</p>
+                        }
+                        @if (r.esActual && fuenteDetalle()) { <p class="co__note">{{ fuenteDetalle() }}</p> }
+                        @if (!r.esActual && r.calculadoEn) { <p class="co__note">Calculado el {{ fmtFechaHora(r.calculadoEn) }}.</p> }
+                      }
+                    </section>
+
+                    <section class="card" aria-label="Consumo por equipo y ambiente">
+                      <header class="card__head">
+                        <div>
+                          <h2 class="card__title">Dónde se va tu energía</h2>
+                          <p class="card__sub">
+                            kWh reales por equipo según las horas de uso registradas.
+                            @if (r.esActual && detalle(); as d) { Calculado el {{ fmtFechaHora(d.calculado_en) }}. }
+                          </p>
+                        </div>
+                      </header>
+
+                      @switch (detalleStatus()) {
+                        @case ('loading') {
+                          <div aria-busy="true" aria-label="Cargando desglose"><div class="skel__line"></div><div class="skel__line"></div><div class="skel__line skel__line--sm"></div></div>
+                        }
+                        @case ('error') {
+                          <div class="co__inline-state" role="alert">
+                            <p>No pudimos cargar el desglose.</p>
+                            <button type="button" class="btn" (click)="cargarDetalle()"><app-icon name="refresh" [size]="14" /> Reintentar</button>
+                          </div>
+                        }
+                        @default {
+                          @if (detalle() === null) {
+                            <div class="co__inline-state">
+                              <p>Este ciclo todavía no tiene un desglose guardado. Actualiza el cálculo para generarlo con tus registros de uso.</p>
+                              <button type="button" class="btn" (click)="recalcular()" [disabled]="recalculando()">
+                                <app-icon name="refresh" [size]="14" /> {{ recalculando() ? 'Actualizando…' : 'Actualizar cálculo' }}
+                              </button>
+                            </div>
+                          } @else if (porEquipo().length === 0) {
+                            <p class="co__hint">
+                              No hay horas de uso registradas en este periodo. El desglose por equipo se calcula con el uso diario
+                              (las lecturas del medidor miden toda la casa y no se pueden repartir).
+                              @if (r.esActual) { <button type="button" class="link link--btn" (click)="abrirRegistro('uso')">Registrar uso</button> }
+                            </p>
+                          } @else {
+                            <div class="co__split">
+                              <div>
+                                <h3 class="co__h3">Por electrodoméstico</h3>
+                                <ul class="bars" aria-label="Consumo por electrodoméstico">
+                                  @for (f of porEquipo(); track f.id) {
+                                    <li class="bar">
+                                      <div class="bar__row"><span class="bar__name">{{ f.nombre }}</span><span class="bar__val">{{ fmtNum(f.kwh, 2) }} kWh · {{ fmtNum(f.porcentaje, 1) }} %</span></div>
+                                      <div class="bar__track"><div class="bar__fill" [style.width.%]="f.porcentaje"></div></div>
+                                    </li>
+                                  }
+                                </ul>
+                              </div>
+                              <div>
+                                <h3 class="co__h3">Por ambiente</h3>
+                                <ul class="bars" aria-label="Consumo por ambiente">
+                                  @for (f of porAmbiente(); track f.nombre) {
+                                    <li class="bar">
+                                      <div class="bar__row"><span class="bar__name">{{ f.nombre }}</span><span class="bar__val">{{ fmtNum(f.kwh, 2) }} kWh · {{ fmtNum(f.porcentaje, 1) }} %</span></div>
+                                      <div class="bar__track"><div class="bar__fill bar__fill--alt" [style.width.%]="f.porcentaje"></div></div>
+                                    </li>
+                                  }
+                                </ul>
+                                <p class="co__note">Suma de los kWh por equipo calculados por el sistema, agrupados según el ambiente de cada equipo.</p>
+                              </div>
+                            </div>
+                          }
+                        }
+                      }
+                    </section>
+                  }
+
+                  <section class="card" aria-label="Historial de consumo">
+                    <header class="card__head">
+                      <div>
+                        <h2 class="card__title">Historial por periodo</h2>
+                        <p class="card__sub">Periodos que el sistema ha calculado y guardado para esta vivienda.</p>
+                      </div>
+                    </header>
+
+                    @if (filas().length === 0) {
+                      <p class="co__hint">Todavía no hay periodos guardados. Se guardan automáticamente cada hora o al pulsar «Actualizar cálculo».</p>
+                    } @else {
+                      <ul class="chart" role="img" aria-label="Consumo en kWh por periodo">
+                        @for (b of barras(); track b.key) {
+                          <li class="col" [title]="b.title">
+                            <span class="col__value">{{ fmtNum(b.valor, 0) }}</span>
+                            <div class="cbar" [class.cbar--current]="b.actual" [style.height.px]="b.heightPx">
+                              @if (b.actual) { <div class="cbar__done" [style.height.%]="b.accumulatedPct"></div> }
+                            </div>
+                            <span class="col__label">{{ b.label }}</span>
+                          </li>
+                        }
+                      </ul>
+                      <p class="co__note">kWh por periodo (inicio del ciclo abajo). El ciclo actual muestra lo acumulado y, más claro, lo proyectado.</p>
+
+                      <div class="co__tablewrap">
+                        <table class="co__table">
+                          <thead>
+                            <tr><th>Periodo</th><th class="num">Consumo (kWh)</th><th class="num">Proyección (kWh)</th><th class="num">Monto</th><th>Estado</th><th><span class="sr">Acciones</span></th></tr>
+                          </thead>
+                          <tbody>
+                            @for (f of filas(); track f.sel) {
+                              <tr [class.is-sel]="f.sel === periodoSel()">
+                                <td>{{ fmtDia(f.inicio) }} – {{ fmtDia(f.fin) }}</td>
+                                <td class="num">{{ fmtNum(f.kwh, 1) }}</td>
+                                <td class="num">{{ f.cerrado ? '—' : fmtNum(f.kwhProyectado, 1) }}</td>
+                                <td class="num">{{ montoTexto(f.monto) }}</td>
+                                <td><span class="chip co__chip" [class.co__chip--off]="!f.cerrado">{{ f.cerrado ? 'Cerrado' : 'En curso' }}</span></td>
+                                <td><button type="button" class="btn co__row-btn" (click)="elegirPeriodo(f.sel)">Ver detalle</button></td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                  </section>
+                }
+
+                @case ('lecturas') {
+                  <section class="card" aria-label="Lecturas del medidor">
+                    <header class="card__head">
+                      <div>
+                        <h2 class="card__title">Lecturas del medidor</h2>
+                        <p class="card__sub">Valores acumulados de tu medidor. Con ellas el sistema calcula tu consumo real.</p>
+                      </div>
+                      <button type="button" class="btn btn--primary" (click)="abrirRegistro('lectura')"><app-icon name="plus" [size]="14" /> Registrar lectura</button>
+                    </header>
+                    @if (lecturas().length === 0) {
+                      <p class="co__hint">Aún no registras lecturas del medidor.</p>
+                    } @else {
+                      <div class="co__tablewrap">
+                        <table class="co__table">
+                          <thead><tr><th>Fecha</th><th class="num">Lectura (kWh)</th><th>Observación</th><th><span class="sr">Acciones</span></th></tr></thead>
+                          <tbody>
+                            @for (l of lecturas(); track l.id_lectura) {
+                              <tr>
+                                <td>{{ fmtDia(l.fecha_lectura) }}</td>
+                                <td class="num">{{ fmtNum(l.lectura_kwh, 2) }}</td>
+                                <td class="wrap">{{ l.observacion || '—' }}</td>
+                                <td>
+                                  <button type="button" class="btn btn--danger-ghost co__row-btn" (click)="abrirBorrarLectura(l)" [attr.aria-label]="'Eliminar lectura del ' + fmtDia(l.fecha_lectura)">
+                                    <app-icon name="trash" [size]="14" /> Eliminar
+                                  </button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                  </section>
+                }
+
+                @case ('usos') {
+                  <section class="card" aria-label="Uso diario">
+                    <header class="card__head">
+                      <div>
+                        <h2 class="card__title">Uso diario por equipo</h2>
+                        <p class="card__sub">Horas que usaste cada equipo; los kWh los calcula el sistema.</p>
+                      </div>
+                      @if (electros().length > 0) {
+                        <button type="button" class="btn btn--primary" (click)="abrirRegistro('uso')"><app-icon name="plus" [size]="14" /> Registrar uso</button>
+                      }
+                    </header>
+                    @if (electros().length === 0) {
+                      <p class="co__hint">Para registrar uso primero agrega tus equipos. <a class="link" routerLink="/electrodomesticos">Ir a Electrodomésticos</a></p>
+                    } @else if (usos().length === 0) {
+                      <p class="co__hint">Aún no registras horas de uso.</p>
+                    } @else {
+                      <div class="co__tablewrap">
+                        <table class="co__table">
+                          <thead><tr><th>Fecha</th><th>Equipo</th><th class="num">Horas</th><th class="num">kWh</th><th><span class="sr">Acciones</span></th></tr></thead>
+                          <tbody>
+                            @for (u of usos(); track u.id_registro) {
+                              <tr>
+                                <td>{{ fmtDia(u.fecha) }}</td>
+                                <td class="wrap">{{ u.electrodomestico }}</td>
+                                <td class="num">{{ fmtNum(u.horas_uso, 2) }}</td>
+                                <td class="num">{{ fmtNum(u.kwh_calculado, 3) }}</td>
+                                <td class="co__rowacts">
+                                  <button type="button" class="btn co__row-btn" (click)="abrirEditarUso(u)" [attr.aria-label]="'Corregir horas de ' + u.electrodomestico"><app-icon name="edit" [size]="14" /> Editar</button>
+                                  <button type="button" class="btn btn--danger-ghost co__row-btn" (click)="abrirBorrarUso(u)" [attr.aria-label]="'Eliminar uso de ' + u.electrodomestico"><app-icon name="trash" [size]="14" /> Eliminar</button>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    }
+                  </section>
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+</section>
+
+@switch (dialogo()) {
+  @case ('lectura') {
+    @if (selectedId(); as idVivienda) {
+      <app-registro-dialog modo="lectura" [idVivienda]="idVivienda" (savedLectura)="alGuardarLectura()" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+    }
+  }
+  @case ('uso') {
+    @if (selectedId(); as idVivienda) {
+      <app-registro-dialog modo="uso" [idVivienda]="idVivienda" [electros]="electros()" (savedUso)="alGuardarUso()" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+    }
+  }
+  @case ('editar-uso') {
+    @if (selectedId(); as idVivienda) {
+      @if (actualUso(); as u) {
+        <app-registro-dialog modo="uso" [idVivienda]="idVivienda" [electros]="electros()" [uso]="u" (savedUso)="alGuardarUso()" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+      }
+    }
+  }
+  @case ('borrar-lectura') {
+    @if (actualLectura(); as l) {
+      <app-confirm-dialog
+        title="¿Eliminar esta lectura?"
+        [message]="'Se eliminará la lectura del ' + fmtDia(l.fecha_lectura) + ' (' + fmtNum(l.lectura_kwh, 2) + ' kWh). Tu consumo se calculará con las demás lecturas. Esta acción no se puede deshacer.'"
+        confirmLabel="Eliminar lectura" busyLabel="Eliminando…"
+        [busy]="deleting()" [error]="deleteError()"
+        (confirmed)="confirmarBorrado()" (cancelled)="cerrarDialogo()" />
+    }
+  }
+  @case ('borrar-uso') {
+    @if (actualUso(); as u) {
+      <app-confirm-dialog
+        title="¿Eliminar este registro de uso?"
+        [message]="'Se eliminará el uso de «' + u.electrodomestico + '» del ' + fmtDia(u.fecha) + ' (' + fmtNum(u.horas_uso, 2) + ' h). Esta acción no se puede deshacer.'"
+        confirmLabel="Eliminar registro" busyLabel="Eliminando…"
+        [busy]="deleting()" [error]="deleteError()"
+        (confirmed)="confirmarBorrado()" (cancelled)="cerrarDialogo()" />
+    }
+  }
+}

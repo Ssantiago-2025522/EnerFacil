@@ -1,0 +1,113 @@
+<dialog #dlg class="dlg" aria-labelledby="ef-title" (cancel)="onCancel($event)" (click)="onBackdrop($event)">
+  <form class="dlg__box" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="dlg__head">
+      <div class="dlg__heading">
+        <span class="dlg__icon"><app-icon name="plug" [size]="18" /></span>
+        <div>
+          <h2 id="ef-title" class="dlg__title">{{ editando() ? 'Editar electrodoméstico' : 'Agregar electrodoméstico' }}</h2>
+          <p class="dlg__sub">{{ editando() ? 'Actualiza los datos de uso de este equipo.' : 'Elígelo del catálogo o escribe sus datos.' }}</p>
+        </div>
+      </div>
+      <button type="button" class="dlg__close" (click)="cerrar()" [disabled]="submitting()" aria-label="Cerrar">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    @if (serverError(); as message) { <p class="alert" role="alert">{{ message }}</p> }
+
+    @if (!editando()) {
+      <div class="field field--compact">
+        <label for="ef-catalogo">Catálogo <span class="field__opt">(opcional)</span></label>
+        <select id="ef-catalogo" formControlName="catalogo">
+          <option [ngValue]="null">Escribir los datos manualmente</option>
+          @for (g of grupos(); track g.categoria) {
+            <optgroup [label]="g.categoria">
+              @for (c of g.items; track c.id_catalogo) { <option [ngValue]="c.id_catalogo">{{ c.nombre }}</option> }
+            </optgroup>
+          }
+        </select>
+        @switch (catalogoStatus()) {
+          @case ('loading') { <p class="field__hint">Cargando catálogo…</p> }
+          @case ('error') {
+            <p class="field__hint">
+              No se pudo cargar el catálogo.
+              <button type="button" class="link link--btn" (click)="retryCatalogo.emit()">Reintentar</button>
+              Puedes escribir los datos manualmente.
+            </p>
+          }
+          @case ('ready') { <p class="field__hint">Rellena nombre, potencia, horas y factor con valores promedio; puedes ajustarlos.</p> }
+        }
+      </div>
+    }
+
+    <div class="field field--compact" [class.field--invalid]="error('nombre')">
+      <label for="ef-nombre">Nombre</label>
+      <input id="ef-nombre" type="text" formControlName="nombre" placeholder="Refrigerador" autocomplete="off" autofocus
+             [attr.maxlength]="limites.nombre + 20" [attr.aria-invalid]="error('nombre') ? true : null" />
+      @if (error('nombre'); as message) { <p class="field__error">{{ message }}</p> }
+    </div>
+
+    <div class="field field--compact">
+      <label for="ef-ambiente">Ambiente <span class="field__opt">(opcional)</span></label>
+      <select id="ef-ambiente" formControlName="id_ambiente">
+        <option [ngValue]="null">Sin ambiente</option>
+        @for (a of ambientes(); track a.id_ambiente) { <option [ngValue]="a.id_ambiente">{{ a.nombre }}</option> }
+      </select>
+      @if (ambientes().length === 0) { <p class="field__hint">Esta vivienda aún no tiene ambientes; puedes crearlos en la sección Ambientes.</p> }
+    </div>
+
+    <div class="row">
+      <div class="field field--compact" [class.field--invalid]="error('potencia_w')">
+        <label for="ef-potencia">Potencia (W)</label>
+        <input id="ef-potencia" type="number" inputmode="decimal" step="any" formControlName="potencia_w" placeholder="150"
+               [attr.aria-invalid]="error('potencia_w') ? true : null" />
+        @if (error('potencia_w'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+
+      <div class="field field--compact" [class.field--invalid]="error('cantidad')">
+        <label for="ef-cantidad">Cantidad</label>
+        <input id="ef-cantidad" type="number" inputmode="numeric" step="1" formControlName="cantidad" placeholder="1"
+               [attr.aria-invalid]="error('cantidad') ? true : null" />
+        @if (error('cantidad'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field field--compact" [class.field--invalid]="error('horas_uso_dia')">
+        <label for="ef-horas">Horas de uso al día <span class="field__opt">(0–24)</span></label>
+        <input id="ef-horas" type="number" inputmode="decimal" step="any" formControlName="horas_uso_dia" placeholder="5"
+               [attr.aria-invalid]="error('horas_uso_dia') ? true : null" />
+        @if (error('horas_uso_dia'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+
+      <div class="field field--compact" [class.field--invalid]="error('dias_uso_mes')">
+        <label for="ef-dias">Días de uso al mes <span class="field__opt">(0–31)</span></label>
+        <input id="ef-dias" type="number" inputmode="numeric" step="1" formControlName="dias_uso_mes" placeholder="30"
+               [attr.aria-invalid]="error('dias_uso_mes') ? true : null" />
+        @if (error('dias_uso_mes'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    </div>
+
+    <div class="field field--compact" [class.field--invalid]="error('factor_uso')">
+      <label for="ef-factor">Factor de uso <span class="field__opt">(0–1)</span></label>
+      <input id="ef-factor" type="number" inputmode="decimal" step="any" formControlName="factor_uso" placeholder="1"
+             [attr.aria-invalid]="error('factor_uso') ? true : null" />
+      @if (error('factor_uso'); as message) { <p class="field__error">{{ message }}</p> }
+      <p class="field__hint">Fracción del tiempo que el equipo trabaja a plena potencia (1 = siempre; un refrigerador ronda 0,35).</p>
+    </div>
+
+    @if (editando()) {
+      <label class="check">
+        <input type="checkbox" formControlName="activo" />
+        <span>Activo <small>(si lo desactivas, queda registrado pero marcado como inactivo)</small></span>
+      </label>
+    }
+
+    <footer class="dlg__actions">
+      <button type="button" class="btn" (click)="cerrar()" [disabled]="submitting()">Cancelar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+        @if (submitting()) { Guardando… } @else { {{ editando() ? 'Guardar cambios' : 'Agregar electrodoméstico' }} }
+      </button>
+    </footer>
+  </form>
+</dialog>

@@ -1,0 +1,57 @@
+:host { display: block; }
+.amb { display: flex; flex-direction: column; gap: 16px; }
+.amb__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.amb__title { margin: 0 0 6px; font-size: clamp(24px, 3vw, 30px); font-weight: 500; letter-spacing: -0.02em; }
+.amb__sub { margin: 0; max-width: 60ch; font-size: 13px; color: var(--ef-muted); }
+
+.amb__aviso { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; }
+.amb__aviso-x { display: grid; flex: none; place-items: center; width: 24px; height: 24px; padding: 0; color: inherit; background: none; border: 0; border-radius: 6px; opacity: 0.7; cursor: pointer; }
+.amb__aviso-x:hover { opacity: 1; }
+
+/* Selector de vivienda (solo si hay más de una) */
+.amb__tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.amb__home { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 13px; color: var(--ef-muted); }
+.amb__home span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 38px; padding: 0 14px; font: inherit; font-size: 13px; color: #3b4558; background: #fff; border: 1px solid var(--ef-border); border-radius: 999px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.tab:hover { background: var(--ef-card); }
+.tab:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.tab--active { font-weight: 600; color: var(--ef-blue); background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Lista de ambientes */
+.amb__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.amb__item { display: flex; flex-direction: column; gap: 16px; min-width: 0; padding: 18px; }
+.amb__id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.amb__icon { display: grid; flex: none; place-items: center; width: 40px; height: 40px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 12px; }
+.amb__titles { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
+.amb__name { margin: 0; max-width: 100%; overflow-wrap: anywhere; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.amb__actions { display: flex; gap: 8px; margin-top: auto; }
+.amb__actions .btn { flex: 1; }
+
+/* Estados vacío / error */
+.state { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; text-align: center; }
+.state__icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 18px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 18px; }
+.state__icon--error { color: var(--ef-danger); background: var(--ef-danger-bg); }
+.state__title { margin: 0 0 8px; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.state__text { max-width: 46ch; margin: 0 0 22px; font-size: 14px; line-height: 1.55; color: var(--ef-muted); }
+.state--error .state__title + .btn { margin-top: 14px; }
+.state a.btn { text-decoration: none; }
+
+/* Skeleton de carga */
+.skel { padding: 24px; }
+.skel--item { padding: 18px; }
+.skel__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+.skel__cell { padding: 14px 16px; background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 12px; }
+.skel__line { height: 14px; margin-top: 10px; background: linear-gradient(90deg, #eceff4 25%, #f6f8fb 50%, #eceff4 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s ease-in-out infinite; }
+.skel__line--title { width: 40%; height: 22px; margin-top: 0; }
+.skel__line--sm { width: 35%; height: 10px; margin-top: 0; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel__line { animation: none; } }
+
+@media (max-width: 700px) {
+  .amb__head { flex-direction: column; }
+  .amb__add { width: 100%; }
+  .skel__grid { grid-template-columns: minmax(0, 1fr); }
+  .state { padding: 36px 18px; }
+  .state .btn { width: 100%; }
+}

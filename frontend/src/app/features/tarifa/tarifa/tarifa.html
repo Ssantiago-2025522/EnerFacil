@@ -1,0 +1,138 @@
+<section class="tf">
+  <header class="tf__head">
+    <h1 class="tf__title">Mi tarifa</h1>
+    <p class="tf__sub">Consulta la tarifa utilizada para calcular el costo estimado de electricidad de tu vivienda.</p>
+  </header>
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tu tarifa">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">La tarifa se asigna a cada vivienda. Agrega tu hogar y vuelve aquí para ver cómo se calcula tu consumo.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="tf__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="tf__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="card skel" aria-busy="true" aria-label="Cargando tarifa">
+              <div class="skel__line skel__line--title"></div>
+              <div class="skel__line"></div>
+              <div class="skel__line"></div>
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tu tarifa</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (tarifa(); as t) {
+              <section class="card" aria-label="Tarifa de tu vivienda">
+                <header class="card__head">
+                  <div>
+                    <h2 class="card__title">{{ t.nombre }}</h2>
+                    @if (origen()) { <p class="card__sub">{{ origen() }}</p> }
+                  </div>
+                  <span class="chip tf__chip">{{ tipoLabel(t.tipo) }}</span>
+                </header>
+
+                <p class="tf__text">Esta tarifa se utiliza para estimar el costo de tu consumo.</p>
+
+                <h3 class="tf__h3">Tramos de consumo</h3>
+                <div class="tf__tablewrap">
+                  <table class="tf__table">
+                    <thead>
+                      <tr><th scope="col">Consumo del mes</th><th scope="col" class="tf__num">Precio por kWh</th></tr>
+                    </thead>
+                    <tbody>
+                      @for (tr of tramos(); track tr.kwh_desde) {
+                        <tr>
+                          <td>{{ rango(tr) }}</td>
+                          <td class="tf__num">{{ precio(tr.precio_kwh) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+
+                @if (t.cargo_fijo > 0 || t.impuesto_pct > 0) {
+                  <dl class="tf__extras">
+                    @if (t.cargo_fijo > 0) {
+                      <div class="kpi">
+                        <dt>Cargo fijo mensual</dt>
+                        <dd><strong>{{ monto(t.cargo_fijo) }}</strong></dd>
+                      </div>
+                    }
+                    @if (t.impuesto_pct > 0) {
+                      <div class="kpi">
+                        <dt>Impuestos y tasas</dt>
+                        <dd><strong>{{ fmtNum(t.impuesto_pct, 2) }} %</strong></dd>
+                      </div>
+                    }
+                  </dl>
+                }
+
+                <div class="tf__how">
+                  <span class="tf__how-icon"><app-icon name="info" [size]="16" /></span>
+                  <div>
+                    <strong>¿Cómo se calcula tu costo?</strong>
+                    <p>{{ explicacion() }}</p>
+                  </div>
+                </div>
+
+                <p class="tf__vigencia">
+                  Vigente desde {{ fmtDia(t.vigente_desde) }}@if (t.vigente_hasta) { hasta {{ fmtDia(t.vigente_hasta) }} }.
+                  Para usar otra tarifa, cámbiala en <a class="link" routerLink="/vivienda">Mi vivienda</a>.
+                </p>
+              </section>
+            } @else {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="receipt" [size]="24" /></span>
+                <h2 class="state__title">No hay una tarifa configurada para esta vivienda.</h2>
+                <p class="state__text">Sin una tarifa no podemos estimar el costo de tu consumo. Elige una desde Mi vivienda.</p>
+                <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Elegir tarifa</a>
+              </div>
+            }
+          }
+        }
+      }
+    }
+  }
+</section>

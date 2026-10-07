@@ -1,0 +1,9 @@
+@for (alert of alerts(); track alert.id) {
+  <div [class]="'alert alert--' + alert.severity" role="status">
+    <span class="alert__icon"><app-icon [name]="alert.severity === 'info' || alert.severity === 'success' ? 'info' : 'alert'" [size]="16" /></span>
+    <div class="alert__text">
+      <p class="alert__title">{{ alert.title }}</p>
+      <p class="alert__desc">{{ alert.description }}</p>
+    </div>
+  </div>
+}

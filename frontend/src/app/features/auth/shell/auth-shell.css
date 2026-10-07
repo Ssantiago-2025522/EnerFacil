@@ -1,0 +1,131 @@
+:host { display: block; }
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 28px clamp(20px, 4.5vw, 64px) 24px;
+}
+
+/* ----- Cabecera ----- */
+.shell__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ef-ink); text-decoration: none; }
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #b88a14;
+  background: var(--ef-warn-bg);
+  border-radius: 9px;
+}
+.brand__name { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.shell__switch { margin: 0; font-size: 14px; color: var(--ef-muted); text-align: right; }
+.shell__switch .link { margin-left: 4px; }
+
+/* ----- Contenido ----- */
+.shell__main {
+  display: grid;
+  flex: 1;
+  /* Formulario + panel forman un bloque centrado y pegado entre sí (panel de 380–620 px) */
+  grid-template-columns: minmax(0, 480px) clamp(380px, 33vw, 620px);
+  justify-content: center;
+  gap: clamp(32px, 4vw, 72px);
+  align-items: center;
+  padding-block: 32px;
+}
+.shell__form { display: flex; align-items: center; justify-content: center; }
+
+/* ----- Panel de imagen ----- */
+.visual {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* Altura proporcional a la ventana para que no domine la pantalla */
+  height: clamp(460px, 68dvh, 660px);
+  padding: 24px;
+  background: var(--ef-blue-soft);
+  border-radius: 28px;
+}
+.visual__frame {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: var(--ef-card);
+  border: 1px solid var(--ef-border);
+  border-radius: 20px;
+}
+.visual__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+}
+.visual__pill {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--ef-muted);
+  background: #fff;
+  border-radius: 999px;
+}
+.visual__center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.visual__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
+  color: var(--ef-blue);
+  background: #fff;
+  border: 1px solid var(--ef-border);
+  border-radius: 12px;
+}
+.visual__title { margin: 0; font-size: 15px; font-weight: 500; }
+.visual__sub { margin: 0; font-size: 11px; color: var(--ef-muted); }
+.visual__caption { position: absolute; bottom: 14px; margin: 0; font-size: 10px; color: var(--ef-muted); }
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--ef-warn-bg);
+  border-radius: 16px;
+}
+.notice__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--ef-ink);
+  background: var(--ef-yellow);
+  border-radius: 10px;
+}
+.notice__title { margin: 0 0 2px; font-size: 12px; font-weight: 600; }
+.notice__text { margin: 0; font-size: 11px; color: var(--ef-muted); }
+
+/* ----- Pie ----- */
+.shell__footer { display: flex; justify-content: space-between; gap: 16px; font-size: 12px; color: var(--ef-muted); }
+
+/* ----- Tablet / móvil: se oculta el panel de imagen y el formulario ocupa todo el ancho ----- */
+@media (max-width: 960px) {
+  .shell__main { grid-template-columns: minmax(0, 1fr); align-items: center; padding-block: 40px; }
+  .visual { display: none; }
+}
+
+@media (max-width: 520px) {
+  .shell { padding: 20px 20px 20px; }
+  .shell__header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .shell__switch { text-align: left; }
+  .shell__footer { flex-direction: column; gap: 4px; }
+}

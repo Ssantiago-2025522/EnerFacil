@@ -1,0 +1,44 @@
+<app-auth-shell switchText="¿Aún no tienes cuenta?" switchLabel="Regístrate" switchLink="/register">
+  <div class="auth-card">
+    <p class="auth-eyebrow">Bienvenido a casa</p>
+    <h1 class="auth-title">Inicia sesión</h1>
+    <p class="auth-lead">Vuelve a tu hogar y sigue de cerca tu consumo eléctrico.</p>
+
+    <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (serverError(); as message) {
+        <p class="auth-alert" role="alert">{{ message }}</p>
+      }
+
+      <div class="field" [class.field--invalid]="error('email')">
+        <label for="login-email">Correo</label>
+        <input id="login-email" type="email" formControlName="email" placeholder="tu@correo.com"
+               autocomplete="email" [attr.aria-invalid]="error('email') ? true : null" />
+        @if (error('email'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+
+      <div class="field" [class.field--invalid]="error('password')">
+        <label for="login-password">Contraseña</label>
+        <div class="input-wrap">
+          <input id="login-password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                 placeholder="Tu contraseña" autocomplete="current-password"
+                 [attr.aria-invalid]="error('password') ? true : null" />
+          <button type="button" class="input-toggle" (click)="togglePassword()"
+                  [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            @if (showPassword()) {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 6.1A9.8 9.8 0 0 1 12 6c5 0 8.5 4 9.5 6a12.6 12.6 0 0 1-2.6 3.3M6.6 6.7A12.7 12.7 0 0 0 2.5 12c1 2 4.5 6 9.5 6 1.5 0 2.8-.4 4-.9M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>
+            } @else {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+            }
+          </button>
+        </div>
+        @if (error('password'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="submitting()">
+        @if (submitting()) { Ingresando… } @else { Iniciar sesión <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg> }
+      </button>
+    </form>
+
+    <p class="auth-switch">¿Eres nuevo en EnerFacil? <a routerLink="/register">Regístrate</a></p>
+  </div>
+</app-auth-shell>

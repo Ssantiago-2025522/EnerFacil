@@ -1,0 +1,150 @@
+<section class="amb">
+  <header class="amb__head">
+    <div>
+      <h1 class="amb__title">Ambientes</h1>
+      <p class="amb__sub">Organiza los espacios de tu vivienda, como sala, cocina o dormitorio. Después podrás asignarles tus electrodomésticos.</p>
+    </div>
+    @if (status() === 'ready' && selected() && ambientes().length > 0) {
+      <button type="button" class="btn btn--primary amb__add" (click)="abrirCrear()">
+        <app-icon name="plus" [size]="15" /> Agregar ambiente
+      </button>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert amb__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'" role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="amb__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso">
+        <app-icon name="close" [size]="14" />
+      </button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tus ambientes">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__grid">
+          @for (i of [1, 2, 3]; track i) {
+            <div class="skel__cell"><div class="skel__line skel__line--sm"></div><div class="skel__line"></div></div>
+          }
+        </div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()">
+          <app-icon name="refresh" [size]="15" /> Reintentar
+        </button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">Los ambientes pertenecen a una vivienda. Agrega tu hogar y vuelve aquí para organizar sus espacios.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="amb__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionar(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="amb__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="amb__grid" aria-busy="true" aria-label="Cargando ambientes">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="card skel skel--item"><div class="skel__line skel__line--title"></div><div class="skel__line skel__line--sm"></div></div>
+              }
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tus ambientes</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()">
+                <app-icon name="refresh" [size]="15" /> Reintentar
+              </button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (ambientes().length === 0) {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="door" [size]="24" /></span>
+                <h2 class="state__title">Aún no tienes ambientes</h2>
+                <p class="state__text">Agrega espacios como sala, cocina, dormitorio, baño, etc.</p>
+                <button type="button" class="btn btn--primary" (click)="abrirCrear()">
+                  <app-icon name="plus" [size]="15" /> Agregar ambiente
+                </button>
+              </div>
+            } @else {
+              <ul class="amb__grid" aria-label="Ambientes de la vivienda">
+                @for (a of ambientes(); track a.id_ambiente) {
+                  <li class="card amb__item">
+                    <div class="amb__id">
+                      <span class="amb__icon"><app-icon name="door" [size]="18" /></span>
+                      <div class="amb__titles">
+                        <h2 class="amb__name">{{ a.nombre }}</h2>
+                        <span class="chip amb__tipo">{{ tipoLabel[a.tipo] }}</span>
+                      </div>
+                    </div>
+                    <div class="amb__actions">
+                      <button type="button" class="btn" (click)="abrirEditar(a)" [attr.aria-label]="'Editar ' + a.nombre">
+                        <app-icon name="edit" [size]="14" /> Editar
+                      </button>
+                      <button type="button" class="btn btn--danger-ghost" (click)="abrirEliminar(a)" [attr.aria-label]="'Eliminar ' + a.nombre">
+                        <app-icon name="trash" [size]="14" /> Eliminar
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        }
+      }
+    }
+  }
+</section>
+
+@switch (dialogo()) {
+  @case ('crear') {
+    @if (selectedId(); as idVivienda) {
+      <app-ambiente-form-dialog [idVivienda]="idVivienda" (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+    }
+  }
+  @case ('editar') {
+    @if (editando(); as a) {
+      <app-ambiente-form-dialog [ambiente]="a" [idVivienda]="a.id_vivienda" (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+    }
+  }
+  @case ('eliminar') {
+    @if (editando(); as a) {
+      <app-confirm-dialog
+        title="¿Eliminar este ambiente?"
+        [message]="'Se eliminará «' + a.nombre + '». Los electrodomésticos asignados a este ambiente no se borran: quedarán sin ambiente asignado. Esta acción no se puede deshacer.'"
+        confirmLabel="Eliminar ambiente" busyLabel="Eliminando…"
+        [busy]="deleting()" [error]="deleteError()"
+        (confirmed)="confirmarEliminar()" (cancelled)="cerrarDialogo()" />
+    }
+  }
+}

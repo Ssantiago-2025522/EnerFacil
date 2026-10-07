@@ -1,0 +1,88 @@
+:host { display: block; }
+.pr { display: flex; flex-direction: column; gap: 16px; }
+.pr__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+.pr__title { margin: 0 0 6px; font-size: clamp(24px, 3vw, 30px); font-weight: 500; letter-spacing: -0.02em; }
+.pr__sub { margin: 0; max-width: 62ch; font-size: 13px; color: var(--ef-muted); }
+.pr__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.pr__aviso { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; }
+.pr__aviso-x { display: grid; flex: none; place-items: center; width: 24px; height: 24px; padding: 0; color: inherit; background: none; border: 0; border-radius: 6px; opacity: 0.7; cursor: pointer; }
+.pr__aviso-x:hover { opacity: 1; }
+
+/* Selector de vivienda */
+.pr__tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.pr__home { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 13px; color: var(--ef-muted); }
+.pr__home span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 38px; padding: 0 14px; font: inherit; font-size: 13px; color: #3b4558; background: #fff; border: 1px solid var(--ef-border); border-radius: 999px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.tab:hover { background: var(--ef-card); }
+.tab:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.tab--active { font-weight: 600; color: var(--ef-blue); background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Resumen */
+.pr__chip { color: var(--ef-blue); background: var(--ef-blue-soft); }
+.pr__chip--off { color: var(--ef-muted); background: #eceff4; }
+.pr__kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 12px; margin: 0; }
+.kpi { min-width: 0; padding: 14px 16px; background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 12px; }
+.kpi dt { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--ef-muted); }
+.kpi dd { margin: 0; overflow-wrap: anywhere; font-size: 13px; color: var(--ef-muted); }
+.kpi dd strong { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: var(--ef-ink); }
+.kpi__sub { margin-top: 4px !important; font-size: 12px !important; }
+.kpi--danger { background: var(--ef-danger-bg); border-color: #f4c6c6; }
+.kpi--danger dd strong { color: var(--ef-danger); }
+.pr__note { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--ef-muted); }
+
+/* Estado del presupuesto */
+.pr__banner { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; padding: 14px 16px; color: #3b4558; background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 12px; }
+.pr__banner-icon { display: grid; flex: none; place-items: center; width: 34px; height: 34px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 10px; }
+.pr__banner-title { display: block; margin-bottom: 2px; font-size: 14px; font-weight: 600; color: var(--ef-ink); }
+.pr__banner-text { margin: 0; font-size: 13px; line-height: 1.5; }
+.pr__banner-text .link { margin-left: 4px; }
+.pr__banner--ok { background: var(--ef-success-bg); border-color: #c6e5d3; }
+.pr__banner--ok .pr__banner-icon { color: var(--ef-success); background: #d7efe2; }
+.pr__banner--warn { background: var(--ef-warn-bg); border-color: var(--ef-warn-border); }
+.pr__banner--warn .pr__banner-icon { color: var(--ef-warn); background: #fbe8b4; }
+.pr__banner--danger { background: var(--ef-danger-bg); border-color: #f4c6c6; }
+.pr__banner--danger .pr__banner-icon { color: var(--ef-danger); background: #f9d5d5; }
+
+/* Barras de avance */
+.pr__meters { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.meter__row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.meter__row span:last-child { color: var(--ef-muted); }
+.meter { height: 8px; overflow: hidden; background: #eceff4; border-radius: 999px; }
+.meter__fill { height: 100%; min-width: 2px; background: var(--ef-blue); border-radius: 999px; }
+.meter__fill--ok { background: var(--ef-success); }
+.meter__fill--warn { background: var(--ef-yellow); }
+.meter__fill--danger { background: var(--ef-danger); }
+.meter__fill--proy { background: var(--ef-bar-soft); }
+
+/* Tabla de otros presupuestos */
+.pr__tablewrap { overflow-x: auto; }
+.pr__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pr__table th { padding: 8px 12px; font-size: 11px; font-weight: 600; text-align: left; color: var(--ef-muted); white-space: nowrap; border-bottom: 1px solid var(--ef-border); }
+.pr__table td { padding: 10px 12px; vertical-align: middle; white-space: nowrap; border-bottom: 1px solid var(--ef-border); font-variant-numeric: tabular-nums; }
+
+/* Estados vacío / error */
+.state { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; text-align: center; }
+.state__icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 18px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 18px; }
+.state__icon--error { color: var(--ef-danger); background: var(--ef-danger-bg); }
+.state__title { margin: 0 0 8px; overflow-wrap: anywhere; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.state__text { max-width: 50ch; margin: 0 0 22px; font-size: 14px; line-height: 1.55; color: var(--ef-muted); }
+.state--error .state__title + .btn { margin-top: 14px; }
+.state a.btn { text-decoration: none; }
+
+/* Skeleton de carga */
+.skel { padding: 24px; }
+.skel--item { padding: 18px; }
+.skel__line { height: 14px; margin-top: 10px; background: linear-gradient(90deg, #eceff4 25%, #f6f8fb 50%, #eceff4 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s ease-in-out infinite; }
+.skel__line--title { width: 40%; height: 22px; margin-top: 0; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel__line { animation: none; } }
+
+@media (max-width: 700px) {
+  .pr__head { flex-direction: column; }
+  .pr__actions { width: 100%; }
+  .pr__actions .btn { flex: 1; }
+  .state { padding: 36px 18px; }
+  .state .btn { width: 100%; }
+}

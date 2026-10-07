@@ -1,0 +1,17 @@
+<dialog #dlg class="dlg" aria-labelledby="confirm-title" aria-describedby="confirm-msg"
+        (cancel)="onCancel($event)" (click)="onBackdrop($event)">
+  <div class="dlg__box">
+    <span class="dlg__icon"><app-icon name="alert" [size]="20" /></span>
+    <h2 id="confirm-title" class="dlg__title">{{ title() }}</h2>
+    <p id="confirm-msg" class="dlg__msg">{{ message() }}</p>
+
+    @if (error(); as message) { <p class="alert dlg__alert" role="alert">{{ message }}</p> }
+
+    <div class="dlg__actions">
+      <button type="button" class="btn" [disabled]="busy()" (click)="cancelled.emit()">Cancelar</button>
+      <button type="button" class="btn btn--danger" [disabled]="busy()" (click)="confirmed.emit()">
+        {{ busy() ? busyLabel() : confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</dialog>

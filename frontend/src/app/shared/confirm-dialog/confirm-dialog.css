@@ -1,0 +1,13 @@
+:host { display: contents; }
+.dlg { width: min(440px, calc(100vw - 32px)); max-width: none; padding: 0; color: var(--ef-ink); background: #fff; border: 1px solid var(--ef-border); border-radius: 16px; box-shadow: 0 24px 60px rgb(28 36 52 / 0.2); }
+.dlg::backdrop { background: rgb(28 36 52 / 0.45); }
+.dlg__box { padding: 24px; }
+.dlg__icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 14px; color: var(--ef-danger); background: var(--ef-danger-bg); border-radius: 12px; }
+.dlg__title { margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.dlg__msg { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ef-muted); }
+.dlg__alert { margin: 16px 0 0; }
+.dlg__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+@media (max-width: 480px) {
+  .dlg__actions { flex-direction: column-reverse; }
+  .dlg__actions .btn { width: 100%; }
+}

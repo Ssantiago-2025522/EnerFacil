@@ -1,0 +1,32 @@
+<section class="card budget">
+  <header class="card__head">
+    <h2 class="card__title">Tu presupuesto del mes</h2>
+    <a class="card__link" routerLink="/presupuesto">Ver presupuesto <app-icon name="arrow-right" [size]="13" /></a>
+  </header>
+
+  @if (presupuesto(); as p) {
+    <p class="budget__goal">Presupuesto mensual: {{ monto(p.monto_mensual) }}</p>
+
+    @if (p.porcentaje_utilizado !== null) {
+      <p class="budget__pct">{{ fmt(p.porcentaje_utilizado, 1) }} %</p>
+      <p class="budget__of">de tu presupuesto utilizado</p>
+      <div class="track" role="progressbar" [attr.aria-valuenow]="barra()" aria-valuemin="0" aria-valuemax="100"
+           aria-label="Presupuesto utilizado">
+        <div class="track__fill" [class]="'track__fill track__fill--' + tono()" [style.width.%]="barra()"></div>
+      </div>
+    } @else {
+      <p class="budget__none">No hay datos disponibles para calcular el porcentaje utilizado.</p>
+    }
+
+    <dl class="budget__grid">
+      <div><dt>Acumulado</dt><dd>{{ monto(acumulado()) }}</dd></div>
+      <div><dt>Disponible</dt><dd>{{ monto(disponible()) }}</dd></div>
+      @if (p.porcentaje_proyectado !== null) {
+        <div><dt>Proyectado al cierre</dt><dd>{{ fmt(p.porcentaje_proyectado, 1) }} %</dd></div>
+      }
+    </dl>
+  } @else {
+    <p class="budget__empty">No tienes un presupuesto configurado.</p>
+    <a class="btn" routerLink="/presupuesto">Configurar presupuesto</a>
+  }
+</section>

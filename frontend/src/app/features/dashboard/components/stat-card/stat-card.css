@@ -1,0 +1,14 @@
+:host { display: block; }
+.stat { height: 100%; padding: 20px 22px; }
+.stat--accent { background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.stat__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stat__label { margin: 0; font-size: 13px; font-weight: 600; }
+.stat__icon { color: var(--ef-blue); }
+.stat__value { display: flex; align-items: baseline; gap: 6px; margin: 18px 0 14px; }
+.stat__num { font-size: 40px; font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
+.stat__unit { font-size: 16px; color: var(--ef-muted); }
+.stat__detail { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; font-size: 13px; font-weight: 600; }
+.stat__detail--accent { color: var(--ef-blue); }
+.stat__detail--positive { color: var(--ef-success); }
+.stat__detail--negative { color: var(--ef-danger); }
+.stat__note { margin: 0; font-size: 12px; color: var(--ef-muted); }

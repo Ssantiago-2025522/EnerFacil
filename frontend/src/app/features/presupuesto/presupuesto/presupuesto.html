@@ -1,0 +1,212 @@
+<section class="pr">
+  <header class="pr__head">
+    <div>
+      <h1 class="pr__title">Presupuesto</h1>
+      <p class="pr__sub">Cuánto quieres gastar en electricidad al mes, cuánto llevas gastado según tu consumo y cómo vas a cerrar el ciclo.</p>
+    </div>
+    @if (viviendasStatus() === 'ready' && selected() && status() === 'ready' && vigente()) {
+      <div class="pr__actions">
+        <button type="button" class="btn" (click)="abrirDialogo()"><app-icon name="edit" [size]="15" /> Editar presupuesto</button>
+      </div>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert pr__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'" role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="pr__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso"><app-icon name="close" [size]="14" /></button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tu presupuesto">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">El presupuesto se define por vivienda. Agrega tu hogar y vuelve aquí para configurarlo.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="pr__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="pr__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="pr__kpis" aria-busy="true" aria-label="Cargando presupuesto">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="card skel skel--item"><div class="skel__line skel__line--title"></div><div class="skel__line"></div></div>
+              }
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tu presupuesto</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (resumen(); as r) {
+              <section class="card pr__summary" aria-label="Resumen del presupuesto">
+                <header class="card__head">
+                  <div>
+                    <h2 class="card__title">Presupuesto mensual</h2>
+                    @if (proy(); as p) {
+                      <p class="card__sub">
+                        Ciclo actual: {{ fmtDia(p.fecha_inicio, 'long') }} – {{ fmtDia(p.fecha_fin, 'long') }} · día {{ p.dias_transcurridos }} de {{ p.dias_totales }}
+                      </p>
+                    }
+                  </div>
+                  @if (proy(); as p) { <span class="chip pr__chip">{{ fuenteLabel(p.fuente) }}</span> }
+                </header>
+
+                @if (banner(); as b) {
+                  <div class="pr__banner" [class.pr__banner--ok]="b.tono === 'ok'" [class.pr__banner--warn]="b.tono === 'warn'"
+                       [class.pr__banner--danger]="b.tono === 'danger'" [attr.role]="b.tono === 'danger' ? 'alert' : 'status'">
+                    <span class="pr__banner-icon"><app-icon [name]="b.tono === 'ok' ? 'leaf' : b.tono === 'neutral' ? 'info' : 'alert'" [size]="18" /></span>
+                    <div>
+                      <strong class="pr__banner-title">{{ b.titulo }}</strong>
+                      <p class="pr__banner-text">
+                        {{ b.texto }}
+                        @if (b.enlace; as l) { <a class="link" [routerLink]="l.ruta">{{ l.texto }}</a> }
+                      </p>
+                    </div>
+                  </div>
+                }
+
+                <dl class="pr__kpis">
+                  <div class="kpi">
+                    <dt>Presupuesto mensual</dt>
+                    <dd><strong>{{ montoTexto(r.monto) }}</strong></dd>
+                    <dd class="kpi__sub">Vigente desde {{ fmtDia(vigente()?.vigente_desde) }}</dd>
+                  </div>
+                  <div class="kpi">
+                    <dt>Gastado hasta ahora (estimado)</dt>
+                    <dd><strong>{{ montoTexto(r.acumulado) }}</strong></dd>
+                  </div>
+                  <div class="kpi" [class.kpi--danger]="r.disponible !== null && r.disponible < 0">
+                    <dt>{{ r.disponible !== null && r.disponible < 0 ? 'Excedido por' : 'Disponible' }}</dt>
+                    <dd><strong>{{ montoTexto(r.disponible === null ? null : (r.disponible < 0 ? -r.disponible : r.disponible)) }}</strong></dd>
+                  </div>
+                  <div class="kpi">
+                    <dt>Porcentaje utilizado</dt>
+                    <dd><strong>{{ r.pctUsado === null ? '—' : fmtNum(r.pctUsado, 1) + ' %' }}</strong></dd>
+                  </div>
+                  <div class="kpi">
+                    <dt>Proyección al cierre del ciclo</dt>
+                    <dd><strong>{{ montoTexto(r.proyectado) }}</strong></dd>
+                    @if (r.pctProyectado !== null) { <dd class="kpi__sub">{{ fmtNum(r.pctProyectado, 1) }} % del presupuesto</dd> }
+                  </div>
+                </dl>
+
+                @if (r.pctUsado !== null) {
+                  <div class="pr__meters">
+                    <div>
+                      <div class="meter__row"><span>Gastado hasta ahora</span><span>{{ fmtNum(r.pctUsado, 1) }} %</span></div>
+                      <div class="meter" role="progressbar" aria-label="Porcentaje del presupuesto utilizado"
+                           aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="barraUsado()">
+                        <div class="meter__fill" [class.meter__fill--ok]="banner()?.tono === 'ok'" [class.meter__fill--warn]="banner()?.tono === 'warn'"
+                             [class.meter__fill--danger]="banner()?.tono === 'danger'" [style.width.%]="barraUsado()"></div>
+                      </div>
+                    </div>
+                    @if (r.pctProyectado !== null) {
+                      <div>
+                        <div class="meter__row"><span>Proyección al cierre</span><span>{{ fmtNum(r.pctProyectado, 1) }} %</span></div>
+                        <div class="meter" role="progressbar" aria-label="Porcentaje del presupuesto según la proyección"
+                             aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="barraProyectado()">
+                          <div class="meter__fill meter__fill--proy" [style.width.%]="barraProyectado()"></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <p class="pr__note">
+                  Los montos son una estimación calculada con tu tarifa (incluyen el cargo fijo); no son una factura real.
+                  El presupuesto es el límite mensual que tú defines.
+                </p>
+              </section>
+            } @else {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="wallet" [size]="24" /></span>
+                <h2 class="state__title">Todavía no tienes un presupuesto configurado para esta vivienda.</h2>
+                <p class="state__text">
+                  Define cuánto quieres gastar en electricidad al mes y te mostraremos cuánto llevas gastado, cuánto te queda y cómo vas a cerrar el ciclo.
+                </p>
+                <button type="button" class="btn btn--primary" (click)="abrirDialogo()"><app-icon name="plus" [size]="15" /> Configurar presupuesto</button>
+              </div>
+            }
+
+            @if (otros().length > 0) {
+              <section class="card" aria-label="Otros presupuestos de la vivienda">
+                <header class="card__head">
+                  <div>
+                    <h2 class="card__title">Otros presupuestos de esta vivienda</h2>
+                    <p class="card__sub">Programados o que ya dejaron de regir.</p>
+                  </div>
+                </header>
+                <div class="pr__tablewrap">
+                  <table class="pr__table">
+                    <thead>
+                      <tr><th>Presupuesto mensual</th><th>Vigencia</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                      @for (p of otros(); track p.id_presupuesto) {
+                        <tr>
+                          <td>{{ montoTexto(p.monto_mensual) }}</td>
+                          <td>{{ fmtDia(p.vigente_desde) }} – {{ p.vigente_hasta ? fmtDia(p.vigente_hasta) : 'sin fecha de fin' }}</td>
+                          <td><span class="chip pr__chip" [class.pr__chip--off]="estadoVigencia(p) === 'Finalizado'">{{ estadoVigencia(p) }}</span></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @if (dialogoAbierto() && selectedId() !== null) {
+    <app-presupuesto-form-dialog
+      [idVivienda]="selectedId()!"
+      [presupuesto]="vigente()"
+      [moneda]="moneda()"
+      (saved)="alGuardar()"
+      (closed)="cerrarDialogo()"
+      (gone)="alDesaparecer()" />
+  }
+</section>

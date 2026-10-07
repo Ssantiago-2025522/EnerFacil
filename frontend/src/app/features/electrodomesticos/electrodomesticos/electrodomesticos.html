@@ -1,0 +1,196 @@
+<section class="eq">
+  <header class="eq__head">
+    <div>
+      <h1 class="eq__title">Electrodomésticos</h1>
+      <p class="eq__sub">Registra los equipos de tu vivienda y cuánto los usas para estimar su consumo eléctrico mensual.</p>
+    </div>
+    @if (status() === 'ready' && selected() && electros().length > 0) {
+      <button type="button" class="btn btn--primary eq__add" (click)="abrirCrear()">
+        <app-icon name="plus" [size]="15" /> Agregar electrodoméstico
+      </button>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert eq__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'" role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="eq__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso">
+        <app-icon name="close" [size]="14" />
+      </button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tus electrodomésticos">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()">
+          <app-icon name="refresh" [size]="15" /> Reintentar
+        </button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">Los electrodomésticos pertenecen a una vivienda. Agrega tu hogar y vuelve aquí para registrar tus equipos.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="eq__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="eq__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="eq__grid" aria-busy="true" aria-label="Cargando electrodomésticos">
+              @for (i of [1, 2, 3]; track i) {
+                <div class="card skel skel--item"><div class="skel__line skel__line--title"></div><div class="skel__line"></div><div class="skel__line skel__line--sm"></div></div>
+              }
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tus electrodomésticos</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()">
+                <app-icon name="refresh" [size]="15" /> Reintentar
+              </button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (electros().length === 0) {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="plug" [size]="24" /></span>
+                <h2 class="state__title">Aún no tienes electrodomésticos</h2>
+                <p class="state__text">Agrega equipos como refrigerador, televisor o lavadora. Puedes elegirlos del catálogo o escribir sus datos.</p>
+                <button type="button" class="btn btn--primary" (click)="abrirCrear()">
+                  <app-icon name="plus" [size]="15" /> Agregar electrodoméstico
+                </button>
+              </div>
+            } @else {
+              <div class="eq__filters" role="group" aria-label="Filtrar por ambiente">
+                <button type="button" class="tab" [class.tab--active]="filtro() === 'todos'" [attr.aria-pressed]="filtro() === 'todos'" (click)="filtrar('todos')">
+                  Todos <span class="tab__count">{{ electros().length }}</span>
+                </button>
+                @for (a of ambientes(); track a.id_ambiente) {
+                  <button type="button" class="tab" [class.tab--active]="filtro() === a.id_ambiente" [attr.aria-pressed]="filtro() === a.id_ambiente" (click)="filtrar(a.id_ambiente)">
+                    <span class="tab__name">{{ a.nombre }}</span> <span class="tab__count">{{ cuenta(a.id_ambiente) }}</span>
+                  </button>
+                }
+                @if (sinAmbienteCount() > 0) {
+                  <button type="button" class="tab" [class.tab--active]="filtro() === 'sin'" [attr.aria-pressed]="filtro() === 'sin'" (click)="filtrar('sin')">
+                    Sin ambiente <span class="tab__count">{{ sinAmbienteCount() }}</span>
+                  </button>
+                }
+              </div>
+
+              @if (visibles().length === 0) {
+                <div class="card state">
+                  <span class="state__icon"><app-icon name="plug" [size]="24" /></span>
+                  <h2 class="state__title">No hay electrodomésticos en {{ filtroNombre() }}</h2>
+                  <p class="state__text">Agrega uno en este ambiente o revisa los demás.</p>
+                  <div class="state__actions">
+                    <button type="button" class="btn btn--primary" (click)="abrirCrear()"><app-icon name="plus" [size]="15" /> Agregar electrodoméstico</button>
+                    <button type="button" class="btn" (click)="filtrar('todos')">Ver todos</button>
+                  </div>
+                </div>
+              } @else {
+                <p class="eq__summary">
+                  {{ visibles().length }} {{ visibles().length === 1 ? 'equipo' : 'equipos' }}
+                  · <strong>{{ fmtNum(totalKwh(), 1) }} kWh/mes</strong> estimados (equipos activos)
+                </p>
+                <ul class="eq__grid" aria-label="Electrodomésticos de la vivienda">
+                  @for (e of visibles(); track e.id_electrodomestico) {
+                    <li class="card eq__item" [class.eq__item--off]="e.activo !== 1">
+                      <div class="eq__id">
+                        <span class="eq__icon"><app-icon name="plug" [size]="18" /></span>
+                        <div class="eq__titles">
+                          <h2 class="eq__name">{{ e.nombre }}</h2>
+                          <div class="eq__chips">
+                            <span class="chip eq__chip">{{ nombreAmbiente(e) }}</span>
+                            @if (e.activo !== 1) { <span class="chip eq__chip eq__chip--off">Inactivo</span> }
+                          </div>
+                        </div>
+                      </div>
+
+                      <dl class="eq__facts">
+                        <div><dt>Potencia</dt><dd>{{ fmtNum(e.potencia_w, 0) }} W{{ e.cantidad > 1 ? ' × ' + e.cantidad : '' }}</dd></div>
+                        <div><dt>Uso diario</dt><dd>{{ fmtNum(e.horas_uso_dia, 1) }} h</dd></div>
+                        <div><dt>Días al mes</dt><dd>{{ e.dias_uso_mes }}</dd></div>
+                        <div><dt>Factor de uso</dt><dd>{{ fmtNum(e.factor_uso, 2) }}</dd></div>
+                      </dl>
+
+                      <p class="eq__kwh"><strong>{{ fmtNum(e.kwh_mes_estimado, 1) }}</strong> kWh/mes estimados</p>
+
+                      <div class="eq__actions">
+                        <button type="button" class="btn" (click)="abrirEditar(e)" [attr.aria-label]="'Editar ' + e.nombre">
+                          <app-icon name="edit" [size]="14" /> Editar
+                        </button>
+                        <button type="button" class="btn btn--danger-ghost" (click)="abrirEliminar(e)" [attr.aria-label]="'Eliminar ' + e.nombre">
+                          <app-icon name="trash" [size]="14" /> Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+</section>
+
+@switch (dialogo()) {
+  @case ('crear') {
+    @if (selectedId(); as idVivienda) {
+      <app-electrodomestico-form-dialog
+        [idVivienda]="idVivienda" [ambientes]="ambientes()" [ambienteInicial]="ambienteInicial()"
+        [catalogo]="catalogo()" [catalogoStatus]="catalogoStatus()"
+        (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" (retryCatalogo)="reintentarCatalogo()" />
+    }
+  }
+  @case ('editar') {
+    @if (actual(); as e) {
+      <app-electrodomestico-form-dialog
+        [electrodomestico]="e" [idVivienda]="e.id_vivienda" [ambientes]="ambientes()"
+        (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" />
+    }
+  }
+  @case ('eliminar') {
+    @if (actual(); as e) {
+      <app-confirm-dialog
+        title="¿Eliminar este electrodoméstico?"
+        [message]="'Se eliminará «' + e.nombre + '» junto con su historial de uso, su consumo por periodo y las recomendaciones asociadas. Esta acción no se puede deshacer. Si solo quieres dejar de contarlo, edítalo y márcalo como inactivo.'"
+        confirmLabel="Eliminar electrodoméstico" busyLabel="Eliminando…"
+        [busy]="deleting()" [error]="deleteError()"
+        (confirmed)="confirmarEliminar()" (cancelled)="cerrarDialogo()" />
+    }
+  }
+}

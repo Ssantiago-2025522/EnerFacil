@@ -1,0 +1,19 @@
+<article class="card stat" [class.stat--accent]="accent()">
+  <header class="stat__head">
+    <h3 class="stat__label">{{ label() }}</h3>
+    <span class="stat__icon"><app-icon [name]="icon()" [size]="16" /></span>
+  </header>
+
+  <p class="stat__value">
+    <span class="stat__num">{{ value() }}</span>
+    @if (unit()) { <span class="stat__unit">{{ unit() }}</span> }
+  </p>
+
+  @if (detail()) {
+    <p [class]="'stat__detail stat__detail--' + tone()">
+      @if (trend(); as t) { <app-icon [name]="t === 'down' ? 'trending-down' : 'trending-up'" [size]="14" /> }
+      {{ detail() }}
+    </p>
+  }
+  @if (note()) { <p class="stat__note">{{ note() }}</p> }
+</article>

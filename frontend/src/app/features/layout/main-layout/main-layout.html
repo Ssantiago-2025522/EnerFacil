@@ -1,0 +1,27 @@
+<div class="layout" [class.layout--open]="menuOpen()">
+  <div class="layout__side"><app-sidebar /></div>
+  <div class="layout__backdrop" (click)="menuOpen.set(false)" aria-hidden="true"></div>
+
+  <div class="layout__main">
+    <header class="top">
+      <button type="button" class="top__menu" (click)="toggleMenu()"
+              [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'" [attr.aria-expanded]="menuOpen()">
+        <app-icon [name]="menuOpen() ? 'close' : 'menu'" [size]="20" />
+      </button>
+
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <span>Mi hogar</span>
+        @if (pageTitle()) { <span class="crumbs__sep">/</span><strong>{{ pageTitle() }}</strong> }
+      </nav>
+
+      <div class="top__right">
+        @if (illustrative()) { <span class="top__pill">Datos ilustrativos</span> }
+        <button type="button" class="top__bell" aria-label="Notificaciones" title="Próximamente">
+          <app-icon name="bell" [size]="16" />
+        </button>
+      </div>
+    </header>
+
+    <main class="content"><router-outlet /></main>
+  </div>
+</div>

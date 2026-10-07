@@ -1,0 +1,85 @@
+<dialog #dlg class="dlg" aria-labelledby="vf-title" (cancel)="onCancel($event)" (click)="onBackdrop($event)">
+  <form class="dlg__box" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="dlg__head">
+      <div class="dlg__heading">
+        <span class="dlg__icon"><app-icon name="building" [size]="18" /></span>
+        <div>
+          <h2 id="vf-title" class="dlg__title">{{ editando() ? 'Editar vivienda' : 'Agregar vivienda' }}</h2>
+          <p class="dlg__sub">{{ editando() ? 'Actualiza los datos de tu hogar.' : 'Cuéntanos sobre tu hogar. Solo el nombre es obligatorio.' }}</p>
+        </div>
+      </div>
+      <button type="button" class="dlg__close" (click)="cerrar()" [disabled]="submitting()" aria-label="Cerrar">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    @if (serverError(); as message) { <p class="alert" role="alert">{{ message }}</p> }
+
+    <div class="field field--compact" [class.field--invalid]="error('nombre')">
+      <label for="vf-nombre">Nombre</label>
+      <input id="vf-nombre" type="text" formControlName="nombre" placeholder="Mi casa" autocomplete="off" autofocus
+             [attr.maxlength]="limites.nombre + 20" [attr.aria-invalid]="error('nombre') ? true : null" />
+      @if (error('nombre'); as message) { <p class="field__error">{{ message }}</p> }
+    </div>
+
+    <div class="field field--compact" [class.field--invalid]="error('direccion')">
+      <label for="vf-direccion">Dirección <span class="field__opt">(opcional)</span></label>
+      <input id="vf-direccion" type="text" formControlName="direccion" placeholder="Calle, número, ciudad"
+             autocomplete="off" [attr.aria-invalid]="error('direccion') ? true : null" />
+      @if (error('direccion'); as message) { <p class="field__error">{{ message }}</p> }
+    </div>
+
+    <div class="field field--compact" [class.field--invalid]="error('region')">
+      <label for="vf-region">Región <span class="field__opt">(opcional)</span></label>
+      <input id="vf-region" type="text" formControlName="region" placeholder="Por ejemplo, Guatemala"
+             autocomplete="off" [attr.aria-invalid]="error('region') ? true : null" />
+      @if (error('region'); as message) { <p class="field__error">{{ message }}</p> }
+    </div>
+
+    <div class="row">
+      <div class="field field--compact" [class.field--invalid]="error('num_habitantes')">
+        <label for="vf-habitantes">Habitantes <span class="field__opt">(opcional)</span></label>
+        <input id="vf-habitantes" type="number" inputmode="numeric" step="1" formControlName="num_habitantes"
+               placeholder="3" [attr.aria-invalid]="error('num_habitantes') ? true : null" />
+        @if (error('num_habitantes'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+
+      <div class="field field--compact" [class.field--invalid]="error('dia_corte')">
+        <label for="vf-corte">Día de corte <span class="field__opt">(1–28)</span></label>
+        <input id="vf-corte" type="number" inputmode="numeric" step="1" formControlName="dia_corte"
+               placeholder="1" [attr.aria-invalid]="error('dia_corte') ? true : null" />
+        @if (error('dia_corte'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    </div>
+
+    <div class="field field--compact">
+      <label for="vf-tarifa">Tarifa <span class="field__opt">(opcional)</span></label>
+      <select id="vf-tarifa" formControlName="id_tarifa">
+        <option [ngValue]="null">Sin tarifa asignada</option>
+        @for (t of tarifas(); track t.id_tarifa) {
+          <option [ngValue]="t.id_tarifa">{{ t.nombre }}{{ t.id_usuario !== null ? ' (personalizada)' : '' }}</option>
+        }
+      </select>
+      @switch (tarifasStatus()) {
+        @case ('loading') { <p class="field__hint">Cargando tarifas…</p> }
+        @case ('error') {
+          <p class="field__hint">
+            No se pudieron cargar las tarifas.
+            <button type="button" class="link link--btn" (click)="retryTarifas.emit()">Reintentar</button>
+            {{ editando() ? 'Mientras tanto se conserva la tarifa actual.' : '' }}
+          </p>
+        }
+        @case ('ready') {
+          @if (tarifas().length === 0) { <p class="field__hint">Todavía no hay tarifas disponibles.</p> }
+        }
+      }
+    </div>
+
+    <footer class="dlg__actions">
+      <button type="button" class="btn" (click)="cerrar()" [disabled]="submitting()">Cancelar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+        @if (submitting()) { Guardando… } @else { {{ editando() ? 'Guardar cambios' : 'Agregar vivienda' }} }
+      </button>
+    </footer>
+  </form>
+</dialog>

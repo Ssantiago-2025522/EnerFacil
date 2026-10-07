@@ -1,0 +1,140 @@
+<section class="viv">
+  <header class="viv__head">
+    <div>
+      <h1 class="viv__title">Mi vivienda</h1>
+      <p class="viv__sub">Aquí administras la información de tu hogar: ubicación, habitantes, día de corte y tarifa.</p>
+    </div>
+    @if (status() === 'ready' && viviendas().length > 0) {
+      <button type="button" class="btn btn--primary viv__add" (click)="abrirCrear()">
+        <app-icon name="plus" [size]="15" /> Agregar vivienda
+      </button>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert viv__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'"
+       role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="viv__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso">
+        <app-icon name="close" [size]="14" />
+      </button>
+    </p>
+  }
+
+  @switch (status()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tu vivienda">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="skel__cell"><div class="skel__line skel__line--sm"></div><div class="skel__line"></div></div>
+          }
+        </div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tu vivienda</h2>
+        @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargar()">
+          <app-icon name="refresh" [size]="15" /> Reintentar
+        </button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Aún no tienes una vivienda registrada</h2>
+          <p class="state__text">
+            Agrega tu hogar para empezar. Con su información podremos ayudarte a entender y estimar tu consumo eléctrico.
+          </p>
+          <button type="button" class="btn btn--primary" (click)="abrirCrear()">
+            <app-icon name="plus" [size]="15" /> Agregar vivienda
+          </button>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="viv__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionar(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        @if (selected(); as v) {
+          <article class="card home">
+            <header class="home__head">
+              <div class="home__id">
+                <span class="home__icon"><app-icon name="building" [size]="20" /></span>
+                <div class="home__titles">
+                  <h2 class="home__name">{{ v.nombre }}</h2>
+                  @if (creada(); as fecha) { <p class="home__since">Registrada el {{ fecha }}</p> }
+                </div>
+              </div>
+              <div class="home__actions">
+                <button type="button" class="btn" (click)="abrirEditar()"><app-icon name="edit" [size]="14" /> Editar</button>
+                <button type="button" class="btn btn--danger-ghost" (click)="abrirEliminar()">
+                  <app-icon name="trash" [size]="14" /> Eliminar
+                </button>
+              </div>
+            </header>
+
+            <dl class="facts">
+              <div class="fact fact--wide">
+                <dt><app-icon name="pin" [size]="14" /> Dirección</dt>
+                <dd [class.fact__empty]="!v.direccion">{{ v.direccion || 'No especificada' }}</dd>
+              </div>
+              <div class="fact">
+                <dt><app-icon name="map" [size]="14" /> Región</dt>
+                <dd [class.fact__empty]="!v.region">{{ v.region || 'No especificada' }}</dd>
+              </div>
+              <div class="fact">
+                <dt><app-icon name="users" [size]="14" /> Habitantes</dt>
+                <dd [class.fact__empty]="v.num_habitantes === null">{{ v.num_habitantes ?? 'No especificado' }}</dd>
+              </div>
+              <div class="fact">
+                <dt><app-icon name="calendar" [size]="14" /> Día de corte</dt>
+                <dd>Día {{ v.dia_corte }} de cada mes</dd>
+              </div>
+              <div class="fact">
+                <dt><app-icon name="receipt" [size]="14" /> Tarifa</dt>
+                <dd [class.fact__empty]="!tarifaNombre()">{{ tarifaNombre() ?? 'Sin tarifa asignada' }}</dd>
+              </div>
+            </dl>
+          </article>
+        }
+      }
+    }
+  }
+</section>
+
+@switch (dialogo()) {
+  @case ('crear') {
+    <app-vivienda-form-dialog
+      [tarifas]="tarifas()" [tarifasStatus]="tarifasStatus()"
+      (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" (retryTarifas)="cargarTarifas()" />
+  }
+  @case ('editar') {
+    <app-vivienda-form-dialog
+      [vivienda]="selected()" [tarifas]="tarifas()" [tarifasStatus]="tarifasStatus()"
+      (saved)="alGuardar($event)" (closed)="cerrarDialogo()" (gone)="alDesaparecer()" (retryTarifas)="cargarTarifas()" />
+  }
+  @case ('eliminar') {
+    @if (selected(); as v) {
+      <app-confirm-dialog
+        title="¿Eliminar esta vivienda?"
+        [message]="'Se eliminará «' + v.nombre + '» junto con sus ambientes, electrodomésticos y registros asociados. Esta acción no se puede deshacer.'"
+        confirmLabel="Eliminar vivienda" busyLabel="Eliminando…"
+        [busy]="deleting()" [error]="deleteError()"
+        (confirmed)="confirmarEliminar()" (cancelled)="cerrarDialogo()" />
+    }
+  }
+}

@@ -1,0 +1,59 @@
+:host { display: block; }
+.tf { display: flex; flex-direction: column; gap: 16px; }
+.tf__head { margin-bottom: 8px; }
+.tf__title { margin: 0 0 6px; font-size: clamp(24px, 3vw, 30px); font-weight: 500; letter-spacing: -0.02em; }
+.tf__sub { margin: 0; max-width: 62ch; font-size: 13px; color: var(--ef-muted); }
+
+/* Selector de vivienda */
+.tf__tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tf__home { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 13px; color: var(--ef-muted); }
+.tf__home span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 38px; padding: 0 14px; font: inherit; font-size: 13px; color: #3b4558; background: #fff; border: 1px solid var(--ef-border); border-radius: 999px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.tab:hover { background: var(--ef-card); }
+.tab:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.tab--active { font-weight: 600; color: var(--ef-blue); background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Tarifa */
+.tf__chip { color: var(--ef-blue); background: var(--ef-blue-soft); }
+.tf__text { margin: 0 0 18px; font-size: 14px; color: #3b4558; }
+.tf__h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.tf__tablewrap { overflow-x: auto; }
+.tf__table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tf__table th { padding: 8px 12px; font-size: 11px; font-weight: 600; text-align: left; color: var(--ef-muted); white-space: nowrap; border-bottom: 1px solid var(--ef-border); }
+.tf__table td { padding: 12px; white-space: nowrap; border-bottom: 1px solid var(--ef-border); font-variant-numeric: tabular-nums; }
+.tf__table .tf__num { text-align: right; }
+.tf__table td.tf__num { font-weight: 600; }
+
+.tf__extras { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 12px; margin: 18px 0 0; }
+.kpi { min-width: 0; padding: 14px 16px; background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 12px; }
+.kpi dt { margin: 0 0 6px; font-size: 12px; font-weight: 600; color: var(--ef-muted); }
+.kpi dd { margin: 0; overflow-wrap: anywhere; }
+.kpi dd strong { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--ef-ink); }
+
+.tf__how { display: flex; align-items: flex-start; gap: 12px; margin-top: 18px; padding: 14px 16px; font-size: 13px; line-height: 1.5; color: #3b4558; background: var(--ef-card); border: 1px solid var(--ef-border); border-radius: 12px; }
+.tf__how strong { display: block; margin-bottom: 2px; font-size: 14px; color: var(--ef-ink); }
+.tf__how p { margin: 0; }
+.tf__how-icon { display: grid; flex: none; place-items: center; width: 34px; height: 34px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 10px; }
+.tf__vigencia { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--ef-muted); }
+
+/* Estados vacío / error */
+.state { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; text-align: center; }
+.state__icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 18px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 18px; }
+.state__icon--error { color: var(--ef-danger); background: var(--ef-danger-bg); }
+.state__title { margin: 0 0 8px; overflow-wrap: anywhere; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.state__text { max-width: 50ch; margin: 0 0 22px; font-size: 14px; line-height: 1.55; color: var(--ef-muted); }
+.state--error .state__title + .btn { margin-top: 14px; }
+.state a.btn { text-decoration: none; }
+
+/* Skeleton de carga */
+.skel { padding: 24px; }
+.skel__line { height: 14px; margin-top: 10px; background: linear-gradient(90deg, #eceff4 25%, #f6f8fb 50%, #eceff4 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s ease-in-out infinite; }
+.skel__line--title { width: 40%; height: 22px; margin-top: 0; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel__line { animation: none; } }
+
+@media (max-width: 700px) {
+  .state { padding: 36px 18px; }
+  .state .btn { width: 100%; }
+}

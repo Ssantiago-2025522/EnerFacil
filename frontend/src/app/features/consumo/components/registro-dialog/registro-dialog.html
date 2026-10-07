@@ -1,0 +1,79 @@
+<dialog #dlg class="dlg" aria-labelledby="rd-title" (cancel)="onCancel($event)" (click)="onBackdrop($event)">
+  <form class="dlg__box" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <header class="dlg__head">
+      <div class="dlg__heading">
+        <span class="dlg__icon"><app-icon [name]="modo() === 'lectura' ? 'bolt' : 'plug'" [size]="18" /></span>
+        <div>
+          @if (modo() === 'lectura') {
+            <h2 id="rd-title" class="dlg__title">Registrar lectura del medidor</h2>
+            <p class="dlg__sub">Anota el valor acumulado que marca tu medidor (kWh).</p>
+          } @else {
+            <h2 id="rd-title" class="dlg__title">{{ editando() ? 'Corregir horas de uso' : 'Registrar uso diario' }}</h2>
+            <p class="dlg__sub">Horas que usaste un equipo en un día; los kWh los calcula el sistema.</p>
+          }
+        </div>
+      </div>
+      <button type="button" class="dlg__close" (click)="cerrar()" [disabled]="submitting()" aria-label="Cerrar">
+        <app-icon name="close" [size]="18" />
+      </button>
+    </header>
+
+    @if (serverError(); as message) { <p class="alert" role="alert">{{ message }}</p> }
+
+    @if (modo() === 'uso') {
+      @if (editando()) {
+        <p class="rd__fixed"><strong>{{ uso()?.electrodomestico }}</strong> · {{ fmtDia(uso()?.fecha) }}</p>
+      } @else {
+        <div class="field field--compact" [class.field--invalid]="error('id_electrodomestico')">
+          <label for="rd-equipo">Electrodoméstico</label>
+          <select id="rd-equipo" formControlName="id_electrodomestico" [attr.aria-invalid]="error('id_electrodomestico') ? true : null">
+            <option [ngValue]="null">Elige un equipo…</option>
+            @for (e of opcionesEquipo(); track e.id_electrodomestico) {
+              <option [ngValue]="e.id_electrodomestico">{{ e.nombre }}{{ e.activo === 1 ? '' : ' (inactivo)' }}</option>
+            }
+          </select>
+          @if (error('id_electrodomestico'); as message) { <p class="field__error">{{ message }}</p> }
+        </div>
+      }
+    }
+
+    @if (!(modo() === 'uso' && editando())) {
+      <div class="field field--compact" [class.field--invalid]="error('fecha')">
+        <label for="rd-fecha">Fecha</label>
+        <input id="rd-fecha" type="date" formControlName="fecha" [attr.max]="hoy" [attr.aria-invalid]="error('fecha') ? true : null" />
+        @if (error('fecha'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    }
+
+    @if (modo() === 'lectura') {
+      <div class="field field--compact" [class.field--invalid]="error('lectura_kwh')">
+        <label for="rd-lectura">Lectura del medidor (kWh)</label>
+        <input id="rd-lectura" type="number" inputmode="decimal" step="any" formControlName="lectura_kwh" placeholder="12345,6"
+               [attr.aria-invalid]="error('lectura_kwh') ? true : null" />
+        @if (error('lectura_kwh'); as message) { <p class="field__error">{{ message }}</p> }
+        <p class="field__hint">Es el valor acumulado del medidor, no el consumo del día. Con dos o más lecturas el sistema calcula tu consumo.</p>
+      </div>
+
+      <div class="field field--compact" [class.field--invalid]="error('observacion')">
+        <label for="rd-obs">Observación <span class="field__opt">(opcional)</span></label>
+        <input id="rd-obs" type="text" formControlName="observacion" autocomplete="off" [attr.maxlength]="limites.observacion + 20"
+               [attr.aria-invalid]="error('observacion') ? true : null" />
+        @if (error('observacion'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    } @else {
+      <div class="field field--compact" [class.field--invalid]="error('horas_uso')">
+        <label for="rd-horas">Horas de uso <span class="field__opt">(0–24)</span></label>
+        <input id="rd-horas" type="number" inputmode="decimal" step="any" formControlName="horas_uso" placeholder="5"
+               [attr.aria-invalid]="error('horas_uso') ? true : null" />
+        @if (error('horas_uso'); as message) { <p class="field__error">{{ message }}</p> }
+      </div>
+    }
+
+    <footer class="dlg__actions">
+      <button type="button" class="btn" (click)="cerrar()" [disabled]="submitting()">Cancelar</button>
+      <button type="submit" class="btn btn--primary" [disabled]="submitting()">
+        @if (submitting()) { Guardando… } @else { {{ editando() ? 'Guardar cambios' : 'Registrar' }} }
+      </button>
+    </footer>
+  </form>
+</dialog>

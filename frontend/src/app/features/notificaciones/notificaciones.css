@@ -1,0 +1,63 @@
+:host { display: block; }
+.nt { display: flex; flex-direction: column; gap: 16px; }
+.nt__head { margin-bottom: 8px; }
+.nt__title { margin: 0 0 6px; font-size: clamp(24px, 3vw, 30px); font-weight: 500; letter-spacing: -0.02em; }
+.nt__sub { margin: 0; max-width: 62ch; font-size: 13px; color: var(--ef-muted); }
+
+.nt__aviso { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; }
+.nt__aviso-x { display: grid; flex: none; place-items: center; width: 24px; height: 24px; padding: 0; color: inherit; background: none; border: 0; border-radius: 6px; opacity: 0.7; cursor: pointer; }
+.nt__aviso-x:hover { opacity: 1; }
+
+/* Selector de vivienda */
+.nt__tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.nt__home { display: flex; align-items: center; gap: 8px; min-width: 0; margin: 0; font-size: 13px; color: var(--ef-muted); }
+.nt__home span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 38px; padding: 0 14px; font: inherit; font-size: 13px; color: #3b4558; background: #fff; border: 1px solid var(--ef-border); border-radius: 999px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.tab:hover { background: var(--ef-card); }
+.tab:focus-visible { outline: 3px solid rgb(59 111 201 / 0.35); outline-offset: 2px; }
+.tab--active { font-weight: 600; color: var(--ef-blue); background: var(--ef-blue-soft); border-color: #d6e3f9; }
+.tab__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Lista */
+.nt__count { margin: 0; font-size: 13px; color: var(--ef-muted); }
+.nt__list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.nt__item { --tone: var(--ef-blue); --tone-bg: var(--ef-blue-soft); display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: #fff; border: 1px solid var(--ef-border); border-radius: 12px; opacity: 0.8; }
+.nt__item--ok { --tone: var(--ef-success); --tone-bg: var(--ef-success-bg); }
+.nt__item--warn { --tone: var(--ef-warn); --tone-bg: var(--ef-warn-bg); }
+.nt__item--danger { --tone: var(--ef-danger); --tone-bg: var(--ef-danger-bg); }
+.nt__item--unread { background: var(--tone-bg); border-color: var(--tone); border-left-width: 4px; opacity: 1; }
+.nt__icon { display: grid; flex: none; place-items: center; width: 34px; height: 34px; color: var(--tone); background: var(--tone-bg); border-radius: 10px; }
+.nt__item--unread .nt__icon { background: #fff; }
+.nt__body { flex: 1; min-width: 0; }
+.nt__row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.nt__name { overflow-wrap: anywhere; font-size: 14px; font-weight: 600; color: var(--ef-ink); }
+.nt__item:not(.nt__item--unread) .nt__name { font-weight: 500; }
+.nt__badge { padding: 2px 8px; font-size: 11px; font-weight: 600; color: #fff; background: var(--tone); border-radius: 999px; }
+.nt__msg { margin: 4px 0 8px; overflow-wrap: anywhere; font-size: 13px; line-height: 1.5; color: #3b4558; }
+.nt__meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ef-muted); }
+.nt__read { display: inline-flex; align-items: center; gap: 4px; }
+.nt__btn { flex: none; white-space: nowrap; }
+
+/* Estados vacío / error */
+.state { display: flex; flex-direction: column; align-items: center; padding: 48px 24px; text-align: center; }
+.state__icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 18px; color: var(--ef-blue); background: var(--ef-blue-soft); border-radius: 18px; }
+.state__icon--error { color: var(--ef-danger); background: var(--ef-danger-bg); }
+.state__title { margin: 0 0 8px; overflow-wrap: anywhere; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.state__text { max-width: 50ch; margin: 0 0 22px; font-size: 14px; line-height: 1.55; color: var(--ef-muted); }
+.state--error .state__title + .btn { margin-top: 14px; }
+.state a.btn { text-decoration: none; }
+
+/* Skeleton de carga */
+.skel { padding: 24px; }
+.skel__line { height: 14px; margin-top: 10px; background: linear-gradient(90deg, #eceff4 25%, #f6f8fb 50%, #eceff4 75%); background-size: 200% 100%; border-radius: 6px; animation: shimmer 1.4s ease-in-out infinite; }
+.skel__line--title { width: 40%; height: 22px; margin-top: 0; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel__line { animation: none; } }
+
+@media (max-width: 700px) {
+  .nt__item { flex-wrap: wrap; }
+  .nt__body { flex-basis: calc(100% - 50px); }
+  .nt__btn { width: 100%; }
+  .state { padding: 36px 18px; }
+  .state .btn { width: 100%; }
+}

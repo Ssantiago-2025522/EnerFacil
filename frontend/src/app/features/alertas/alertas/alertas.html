@@ -1,0 +1,242 @@
+<section class="al">
+  <header class="al__head">
+    <div>
+      <h1 class="al__title">Alertas</h1>
+      <p class="al__sub">Te decimos si tu consumo va a respetar tu presupuesto mensual y cuándo quieres que te avisemos.</p>
+    </div>
+    @if (viviendasStatus() === 'ready' && selected() && configStatus() === 'ready') {
+      <div class="al__actions">
+        <button type="button" class="btn" (click)="abrirNuevo()"><app-icon name="plus" [size]="15" /> Agregar aviso</button>
+      </div>
+    }
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert al__aviso" [class.alert--success]="a.tipo === 'success'" [class.alert--info]="a.tipo === 'info'" role="status">
+      <span>{{ a.texto }}</span>
+      <button type="button" class="al__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso"><app-icon name="close" [size]="14" /></button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tus alertas">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero registra una vivienda</h2>
+          <p class="state__text">Las alertas se calculan por vivienda. Agrega tu hogar y vuelve aquí para ver cómo vas.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="al__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="al__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        <!-- ================= Estado actual ================= -->
+        @switch (estadoStatus()) {
+          @case ('loading') {
+            <div class="card skel" aria-busy="true" aria-label="Cargando el estado de tu presupuesto">
+              <div class="skel__line skel__line--title"></div>
+              <div class="skel__line"></div>
+              <div class="skel__line"></div>
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar el estado de tu presupuesto</h2>
+              @if (estadoError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (estado(); as e) {
+              @if (banner(); as b) {
+                <section class="card" aria-label="Estado de tu presupuesto">
+                  <header class="card__head">
+                    <div>
+                      <h2 class="card__title">Estado de tu presupuesto</h2>
+                      <p class="card__sub">Ciclo actual: {{ fmtDia(e.fecha_inicio, 'long') }} – {{ fmtDia(e.fecha_fin, 'long') }}</p>
+                    </div>
+                  </header>
+
+                  <div class="al__banner" [class.al__banner--ok]="b.tono === 'ok'" [class.al__banner--warn]="b.tono === 'warn'"
+                       [class.al__banner--danger]="b.tono === 'danger'" [attr.role]="b.tono === 'danger' ? 'alert' : 'status'">
+                    <span class="al__light" aria-hidden="true">
+                      <i [class.on]="b.tono === 'danger'" class="al__lamp al__lamp--red"></i>
+                      <i [class.on]="b.tono === 'warn'" class="al__lamp al__lamp--yellow"></i>
+                      <i [class.on]="b.tono === 'ok'" class="al__lamp al__lamp--green"></i>
+                    </span>
+                    <div>
+                      <span class="al__tag">{{ b.etiqueta }}</span>
+                      <strong class="al__banner-title">{{ b.titulo }}</strong>
+                      <p class="al__banner-text">
+                        {{ b.texto }}
+                        @if (b.enlace; as l) { <a class="link" [routerLink]="l.ruta">{{ l.texto }}</a> }
+                      </p>
+                      @if (b.criterio; as why) { <p class="al__why">{{ why }}</p> }
+                    </div>
+                  </div>
+
+                  @if (e.presupuesto) {
+                    <dl class="al__kpis">
+                      <div class="kpi">
+                        <dt>Presupuesto mensual</dt>
+                        <dd><strong>{{ monto(e.presupuesto.monto_mensual) }}</strong></dd>
+                      </div>
+                      <div class="kpi">
+                        <dt>Gastado hasta ahora</dt>
+                        <dd><strong>{{ monto(e.monto_acumulado) }}</strong></dd>
+                      </div>
+                      <div class="kpi">
+                        <dt>Proyección del ciclo</dt>
+                        <dd><strong>{{ monto(e.monto_proyectado) }}</strong></dd>
+                      </div>
+                    </dl>
+                  }
+
+                  @if (barra(); as br) {
+                    <div class="al__meter">
+                      <div class="al__track" role="progressbar" aria-label="Proyección del ciclo respecto a tu presupuesto"
+                           aria-valuemin="0" [attr.aria-valuemax]="100" [attr.aria-valuenow]="e.porcentaje_proyectado"
+                           [attr.aria-valuetext]="fmtNum(e.porcentaje_proyectado ?? 0, 1) + ' % de tu presupuesto'">
+                        <div class="al__fill" [class.al__fill--ok]="b.tono === 'ok'" [class.al__fill--warn]="b.tono === 'warn'"
+                             [class.al__fill--danger]="b.tono === 'danger'" [style.width.%]="br.lleno"></div>
+                        <span class="al__mark" [style.left.%]="br.proximo"></span>
+                        <span class="al__mark" [style.left.%]="br.superado"></span>
+                      </div>
+                      <ul class="al__legend" aria-label="Porcentajes con los que se compara tu proyección">
+                        <li><i class="al__tick" aria-hidden="true"></i> Aviso: {{ fmtNum(e.umbrales.proximo, 0) }} %</li>
+                        <li><i class="al__tick" aria-hidden="true"></i> Presupuesto superado: {{ fmtNum(e.umbrales.superado, 0) }} %</li>
+                      </ul>
+                      @if (origenUmbrales(); as origen) {
+                        <p class="al__legend-note">
+                          @if (origen === 'propios') { Son los porcentajes que configuraste en «Cuándo avisarte». }
+                          @else { Son los porcentajes habituales; puedes cambiarlos en «Cuándo avisarte». }
+                        </p>
+                      }
+                    </div>
+                  }
+
+                  <p class="al__note">
+                    El estado se calcula según la <strong>proyección</strong> de consumo y los porcentajes que hayas configurado, no solo según lo gastado hasta hoy.
+                    Los montos son una estimación calculada con tu tarifa; no son una factura real.
+                  </p>
+                </section>
+              }
+            }
+          }
+        }
+
+        <!-- ================= Configuración ================= -->
+        <section class="card" aria-label="Cuándo avisarte">
+          <header class="card__head">
+            <div>
+              <h2 class="card__title">Cuándo avisarte</h2>
+              <p class="card__sub">Elige a qué porcentaje quieres recibir cada aviso.</p>
+            </div>
+          </header>
+
+          @switch (configStatus()) {
+            @case ('loading') {
+              <div aria-busy="true" aria-label="Cargando tus avisos">
+                <div class="skel__line skel__line--title"></div>
+                <div class="skel__line"></div>
+              </div>
+            }
+
+            @case ('error') {
+              <div class="al__inline-error" role="alert">
+                <app-icon name="alert" [size]="18" />
+                <div>
+                  <strong>No pudimos cargar tus avisos</strong>
+                  @if (configError(); as message) { <p>{{ message }}</p> }
+                </div>
+                <button type="button" class="btn" (click)="reintentarConfig()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+              </div>
+            }
+
+            @case ('ready') {
+              @if (usaPredeterminados()) {
+                <p class="al__default" role="note">
+                  <app-icon name="info" [size]="15" />
+                  <span>
+                    Mientras no configures los avisos de «te acercas al límite» y «presupuesto superado», usamos valores habituales
+                    @if (estado(); as e) { (ahora: aviso al {{ fmtNum(e.umbrales.proximo, 0) }} % y presupuesto superado al {{ fmtNum(e.umbrales.superado, 0) }} % de tu presupuesto) }.
+                  </span>
+                </p>
+              }
+
+              @if (configs().length === 0) {
+                <div class="al__empty">
+                  <p>Todavía no has configurado ningún aviso para esta vivienda.</p>
+                  <button type="button" class="btn btn--primary" (click)="abrirNuevo()"><app-icon name="plus" [size]="15" /> Agregar aviso</button>
+                </div>
+              } @else {
+                <ul class="al__list">
+                  @for (c of configs(); track c.id_alerta_config) {
+                    <li class="al__item" [class.al__item--off]="c.activa !== 1">
+                      <div class="al__item-main">
+                        <strong>{{ tipoNombre(c.tipo) }}</strong>
+                        <p>{{ tipoDescripcion(c.tipo) }}</p>
+                        @if (c.canal === 'EMAIL') {
+                          <p class="al__item-hint">Por ahora este aviso solo se guarda dentro de la aplicación: no enviamos correos.</p>
+                        }
+                      </div>
+                      <div class="al__item-side">
+                        <span class="al__pct">{{ fmtNum(c.porcentaje_umbral, 2) }} %</span>
+                        <span class="chip al__chip">{{ canalNombre(c.canal) }}</span>
+                        <span class="chip al__chip" [class.al__chip--off]="c.activa !== 1">{{ c.activa === 1 ? 'Activo' : 'Desactivado' }}</span>
+                        <button type="button" class="btn" (click)="abrirEditar(c)" [attr.aria-label]="'Editar: ' + tipoNombre(c.tipo)">
+                          <app-icon name="edit" [size]="15" /> Editar
+                        </button>
+                      </div>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          }
+        </section>
+      }
+    }
+  }
+
+  @if (dialogoAbierto() && selectedId() !== null) {
+    <app-alerta-config-dialog
+      [idVivienda]="selectedId()!"
+      [config]="editando()"
+      [existentes]="configs()"
+      (saved)="alGuardar()"
+      (closed)="cerrarDialogo()"
+      (gone)="alDesaparecer()" />
+  }
+</section>

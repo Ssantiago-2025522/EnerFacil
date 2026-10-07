@@ -1,0 +1,115 @@
+<section class="nt">
+  <header class="nt__head">
+    <h1 class="nt__title">Notificaciones</h1>
+    <p class="nt__sub">Aquí encontrarás avisos importantes sobre el consumo de tu vivienda.</p>
+  </header>
+
+  @if (aviso(); as a) {
+    <p class="alert nt__aviso" role="alert">
+      <span>{{ a }}</span>
+      <button type="button" class="nt__aviso-x" (click)="aviso.set(null)" aria-label="Cerrar aviso"><app-icon name="close" [size]="14" /></button>
+    </p>
+  }
+
+  @switch (viviendasStatus()) {
+    @case ('loading') {
+      <div class="card skel" aria-busy="true" aria-label="Cargando tus notificaciones">
+        <div class="skel__line skel__line--title"></div>
+        <div class="skel__line"></div>
+      </div>
+    }
+
+    @case ('error') {
+      <div class="card state state--error" role="alert">
+        <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+        <h2 class="state__title">No pudimos cargar tus viviendas</h2>
+        @if (viviendasError(); as message) { <p class="state__text">{{ message }}</p> }
+        <button type="button" class="btn btn--primary" (click)="cargarViviendas()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+      </div>
+    }
+
+    @case ('ready') {
+      @if (viviendas().length === 0) {
+        <div class="card state">
+          <span class="state__icon"><app-icon name="home" [size]="24" /></span>
+          <h2 class="state__title">Primero selecciona o registra una vivienda</h2>
+          <p class="state__text">Las notificaciones se muestran por vivienda. Agrega tu hogar y vuelve aquí.</p>
+          <a class="btn btn--primary" routerLink="/vivienda"><app-icon name="building" [size]="15" /> Ir a Mi vivienda</a>
+        </div>
+      } @else {
+        @if (viviendas().length > 1) {
+          <div class="nt__tabs" role="group" aria-label="Elegir vivienda">
+            @for (v of viviendas(); track v.id_vivienda) {
+              <button type="button" class="tab" [class.tab--active]="v.id_vivienda === selectedId()"
+                      [attr.aria-pressed]="v.id_vivienda === selectedId()" (click)="seleccionarVivienda(v.id_vivienda)">
+                <app-icon name="home" [size]="14" />
+                <span class="tab__name">{{ v.nombre }}</span>
+              </button>
+            }
+          </div>
+        } @else if (selected(); as v) {
+          <p class="nt__home"><app-icon name="home" [size]="14" /> <span>{{ v.nombre }}</span></p>
+        }
+
+        @switch (status()) {
+          @case ('loading') {
+            <div class="card skel" aria-busy="true" aria-label="Cargando notificaciones">
+              <div class="skel__line skel__line--title"></div>
+              <div class="skel__line"></div>
+              <div class="skel__line"></div>
+            </div>
+          }
+
+          @case ('error') {
+            <div class="card state state--error" role="alert">
+              <span class="state__icon state__icon--error"><app-icon name="alert" [size]="22" /></span>
+              <h2 class="state__title">No pudimos cargar tus notificaciones</h2>
+              @if (loadError(); as message) { <p class="state__text">{{ message }}</p> }
+              <button type="button" class="btn btn--primary" (click)="reintentar()"><app-icon name="refresh" [size]="15" /> Reintentar</button>
+            </div>
+          }
+
+          @case ('ready') {
+            @if (lista().length === 0) {
+              <div class="card state">
+                <span class="state__icon"><app-icon name="bell" [size]="24" /></span>
+                <h2 class="state__title">No tienes notificaciones pendientes.</h2>
+                <p class="state__text">Cuando tu consumo se acerque o supere tu presupuesto, te avisaremos aquí.</p>
+              </div>
+            } @else {
+              <p class="nt__count" role="status">
+                @if (noLeidas() > 0) { {{ noLeidas() }} sin leer } @else { Estás al día }
+              </p>
+              <ul class="nt__list">
+                @for (n of lista(); track n.id_notificacion) {
+                  <li class="nt__item" [class.nt__item--unread]="!n.leida"
+                      [class.nt__item--ok]="n.nivel === 'VERDE'" [class.nt__item--warn]="n.nivel === 'AMARILLO'" [class.nt__item--danger]="n.nivel === 'ROJO'">
+                    <span class="nt__icon" [attr.aria-label]="nivelLabel(n.nivel)" role="img">
+                      <app-icon [name]="n.nivel === 'VERDE' ? 'leaf' : 'alert'" [size]="18" />
+                    </span>
+                    <div class="nt__body">
+                      <div class="nt__row">
+                        <strong class="nt__name">{{ n.titulo }}</strong>
+                        @if (!n.leida) { <span class="nt__badge">Nueva</span> }
+                      </div>
+                      <p class="nt__msg">{{ n.mensaje }}</p>
+                      <div class="nt__meta">
+                        <time [attr.datetime]="n.enviada_en">{{ fmtFechaHora(n.enviada_en) }}</time>
+                        @if (n.leida) { <span class="nt__read"><app-icon name="info" [size]="12" /> Leída</span> }
+                      </div>
+                    </div>
+                    @if (!n.leida) {
+                      <button type="button" class="btn nt__btn" [disabled]="marcando().has(n.id_notificacion)" (click)="marcarLeida(n)">
+                        {{ marcando().has(n.id_notificacion) ? 'Marcando…' : 'Marcar como leída' }}
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          }
+        }
+      }
+    }
+  }
+</section>
